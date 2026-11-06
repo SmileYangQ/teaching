@@ -1049,7 +1049,7 @@ function createMyApp(){
               if((k==='seq'||k==='sid'||k==='discount') && /^[1-9]\d*$/.test(str(v)) ) return Number(v);
               return v;
             });
-            vals.push(s.absent?'未參加校外教學':(s.verified?'已確認全對':'未校對'));
+            vals.push(s.absent?'未參加校外教學':(s.verified?'已校對':'未校對'));
             row.values=vals;
             for(var c=1;c<=ncol;c++){
               var cell=row.getCell(c), k=KEYS[c-1];
