@@ -355,7 +355,7 @@ main{flex:1;min-height:0;padding:8px 12px;display:flex}
               <td :class="{mod:modS(r.s,'veg')}"><span class="tag" :class="isVegS(r.s) ? 'veg' : 'meat'">{{ isVegS(r.s) ? '🥬 素' : '🍖 葷' }}</span></td>
               <td :class="{mod:modS(r.s,'full')}">{{ isTrue(r.s.full) ? 'V' : '' }}</td>
               <td :class="{mod:modS(r.s,'discount')}">{{ r.s.discount ? '$' + r.s.discount : '' }}</td>
-              <td><span class="tag" :class="r.s.absent ? 'ab' : (r.s.verified ? 'ok' : 'no')">{{ r.s.absent ? '🚫 未參加校外教學' : (r.s.verified ? '✅ 已確認全對' : '未校對') }}</span></td>
+              <td><span class="tag" :class="r.s.absent ? 'ab' : (r.s.verified ? 'ok' : 'no')">{{ r.s.absent ? '🚫 未參加校外教學' : (r.s.verified ? '✅ 已校對' : '未校對') }}</span></td>
               <td><span class="tag warn" v-if="issueMap[r.i].length" :title="issueText(r.i)">⚠️ {{ issueMap[r.i].length }}</span></td>
             </tr>
           </tbody>
