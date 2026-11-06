@@ -134,10 +134,11 @@ main{flex:1;min-height:0;padding:8px 12px;display:flex}
       <p>👉 把檔案拖曳到這裡，或點下方按鈕選擇檔案。</p>
       <div class="btns">
         <label class="btn primary" style="font-size:1.3rem;padding:14px 28px">📂 選擇 Excel 檔案
-          <input type="file" accept=".xlsx,.xls,.xlsm,.csv" style="display:none" @change="onFile">
+          <input type="file" style="display:none" @change="onFile">
         </label>
         <button class="btn" style="font-size:1.1rem" @click="loadSample">🧪 載入範例資料</button>
       </div>
+      <p style="font-size:.9rem;color:#92400e;background:#fef3c7;border-radius:10px;padding:6px 10px">💡 檔案在 Google 雲端硬碟？請在選檔視窗左側選「Google 雲端硬碟」，選 .xlsx 檔即可。若是 Google 試算表，請先在試算表內按「檔案 → 下載 → Microsoft Excel (.xlsx)」，再選下載的檔案。</p>
       <div class="warnbox" v-if="loadError">{{ loadError }}</div>
       <div class="warnbox" v-if="!libs.xlsx">⚠️ SheetJS 載入失敗，無法讀取 Excel，請檢查網路後重新整理。</div>
       <div class="warnbox" v-if="!libs.exceljs">⚠️ ExcelJS 載入失敗，將無法匯出 Excel，請檢查網路後重新整理。</div>
