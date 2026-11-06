@@ -40,6 +40,28 @@ main{flex:1;min-height:0;padding:8px 12px;display:flex}
 /* 卡片 */
 .card{flex:1;min-width:0;display:flex;flex-direction:column;background:#fff;border:5px solid var(--bd);border-radius:20px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.08)}
 .card-top{flex:none;display:flex;align-items:center;gap:14px;padding:8px 16px;background:var(--bg);border-bottom:3px solid var(--bd)}
+.pill{width:100%;height:56px;border:3px solid;border-radius:999px;padding:0 18px;font-size:1.5rem;font-weight:800;cursor:pointer;white-space:nowrap;display:flex;align-items:center;justify-content:center;gap:8px;background:#fff}
+.pill small{font-size:.85rem;opacity:.6}
+.pill.p-yes{border-color:#16a34a;background:#dcfce7;color:#166534}
+.pill.p-no{border-color:#ec4899;background:#fce7f3;color:#9d174d}
+.pill.p-meat{border-color:#16a34a;background:#dcfce7;color:#166534}
+.pill.p-veg{border-color:#ec4899;background:#fce7f3;color:#9d174d}
+.pill.sm{width:auto;height:44px;font-size:1.2rem;padding:0 18px}
+.att-wrap{flex:none;display:flex;flex-direction:column}
+.att-wrap label{font-size:.8rem;color:#64748b;font-weight:600;line-height:1.2}
+.att-seg{display:flex;border:3px solid #cbd5e1;border-radius:999px;overflow:hidden;height:44px;background:#fff}
+.att-seg button{border:0;background:#fff;padding:0 14px;font-size:1.1rem;font-weight:800;color:#64748b;cursor:pointer;white-space:nowrap}
+.att-seg button.yes.on{background:#16a34a;color:#fff}
+.att-seg button.no.on{background:#475569;color:#fff}
+.absent-btn{border:3px dashed #94a3b8;background:#fff;color:#475569;border-radius:999px;padding:6px 14px;font-size:1.05rem;font-weight:800;cursor:pointer;white-space:nowrap;line-height:1.2}
+.absent-btn:hover{background:#f1f5f9}
+.absent-btn.on{border-style:solid;border-color:#475569;background:#475569;color:#fff}
+.card.absent{border-color:#94a3b8!important}
+.card.absent .card-top{background:#f1f5f9}
+.card.absent .card-body{opacity:.55}
+.tbl tr.absent td{background:#e5e7eb;color:#6b7280}
+.tag.ab{background:#e5e7eb;color:#374151}
+.tile.absent{opacity:.55;background:#e5e7eb}
 .gender-badge{border:3px solid var(--bd);background:#fff;color:var(--ac);border-radius:999px;padding:6px 18px;font-size:1.4rem;font-weight:800;cursor:pointer;white-space:nowrap}
 .gender-badge small{font-size:.8rem;opacity:.6}
 .seq{white-space:nowrap;color:var(--ac);line-height:1.1}
@@ -113,7 +135,7 @@ main{flex:1;min-height:0;padding:8px 12px;display:flex}
 .tbl td.nm{font-weight:800;font-size:1.1rem}
 .tag{display:inline-block;border-radius:999px;padding:1px 10px;font-weight:700;font-size:.9rem}
 .tag.m{background:#EBF8FF;color:#2B6CB0}.tag.f{background:#FFF5F5;color:#B83280}
-.tag.ok{background:#dcfce7;color:#166534}.tag.no{background:#f1f5f9;color:#64748b}.tag.veg{background:#CCE5FF;color:#1e40af}.tag.warn{background:#fee2e2;color:#b91c1c}
+.tag.ok{background:#dcfce7;color:#166534}.tag.no{background:#f1f5f9;color:#64748b}.tag.veg{background:#fce7f3;color:#9d174d}.tag.meat{background:#dcfce7;color:#166534}.tag.warn{background:#fee2e2;color:#b91c1c}
 .dash{overflow:auto;padding:14px 16px;gap:12px}
 .dash>*{flex:none}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}
@@ -188,7 +210,7 @@ main{flex:1;min-height:0;padding:8px 12px;display:flex}
     </nav>
     <template v-if="students.length">
       <select v-model.number="idx" title="快速跳到某位學生" @change="tab='card'">
-        <option v-for="(s,i) in students" :key="i" :value="i">{{ s.verified ? '✓' : '　' }} {{ s.seq }} {{ s.name }}{{ issueMap[i].length ? ' ⚠️' : '' }}</option>
+        <option v-for="(s,i) in students" :key="i" :value="i">{{ s.absent ? '🚫' : (s.verified ? '✓' : '　') }} {{ s.seq }} {{ s.name }}{{ issueMap[i].length ? ' ⚠️' : '' }}</option>
       </select>
       <button class="btn green" @click="exportXlsx">⬇️ 匯出 Excel</button>
       <button class="btn dark" @click="reload">📂 重新載入</button>
@@ -229,9 +251,11 @@ main{flex:1;min-height:0;padding:8px 12px;display:flex}
     </section>
 
     <!-- 卡片 -->
-    <section v-else-if="tab==='card'" class="card" :style="themeStyle">
+    <section v-else-if="tab==='card'" class="card" :class="{absent:cur.absent}" :style="themeStyle">
       <div class="card-top">
         <button class="gender-badge" @click="toggleGender" title="點擊切換性別">{{ cur.gender === '女生' ? '♀ 女生' : '♂ 男生' }} <small>⇄</small></button>
+        <div class="att-wrap"><label>校外教學</label>
+          <button class="pill sm" :class="cur.absent ? 'p-no' : 'p-yes'" @click="setAttend(!!cur.absent)" title="點擊切換 參加／未參加">{{ cur.absent ? '🚫 未參加' : '✅ 參加' }} <small>⇄</small></button></div>
         <div class="seq text-3xl font-bold" :class="{}"><span style="font-size:1.9rem;font-weight:800">序號 {{ cur.seq }}</span><small>第 {{ idx + 1 }} / {{ students.length }} 張</small></div>
         <div class="name-wrap">
           <label>姓名 <em v-if="isMod('name')" style="font-style:normal;color:#a16207">✏️ 已修改（原：{{ origOf('name') }}）</em><button class="undo" v-if="isMod('name')" @click="restoreField('name')">↩ 還原</button></label>
@@ -242,7 +266,7 @@ main{flex:1;min-height:0;padding:8px 12px;display:flex}
           <label>學號 <em v-if="isMod('sid')">✏️ 原：{{ origOf('sid') }}</em><button class="undo" v-if="isMod('sid')" @click="restoreField('sid')">↩ 還原</button></label>
           <input id="f-sid" class="sid-input" type="text" autocomplete="off" v-model="cur.sid" @keydown.enter="onEnter('sid',$event)">
         </div>
-        <div class="stamp" :class="{off:!cur.verified}">{{ cur.verified ? '✅ 已確認' : '未校對' }}</div>
+        <div class="stamp" :class="{off:!cur.verified||cur.absent}">{{ cur.absent ? '🚫 未參加' : (cur.verified ? '✅ 已確認' : '未校對') }}</div>
       </div>
 
       <div class="card-body">
@@ -285,17 +309,11 @@ main{flex:1;min-height:0;padding:8px 12px;display:flex}
           <div class="fg-row">
             <div class="fg" :class="{mod:isMod('veg')}">
               <label>是否吃素? <em v-if="isMod('veg')">✏️ 原：{{ origOf('veg') }}</em><button class="undo" v-if="isMod('veg')" @click="restoreField('veg')">↩ 還原</button></label>
-              <div class="seg">
-                <button class="meat" :class="{on:!vegOn}" @click="setVeg(false)">🍖 葷</button>
-                <button class="veg" :class="{on:vegOn}" @click="setVeg(true)">🥬 素</button>
-              </div>
+              <button class="pill" :class="vegOn ? 'p-veg' : 'p-meat'" @click="setVeg(!vegOn)" title="點擊切換 葷／素">{{ vegOn ? '🥬 素' : '🍖 葷' }} <small>⇄</small></button>
             </div>
             <div class="fg" :class="{mod:isMod('full')}">
               <label>全額參加 (V) <em v-if="isMod('full')">✏️ 原：{{ origOf('full') }}</em><button class="undo" v-if="isMod('full')" @click="restoreField('full')">↩ 還原</button></label>
-              <div class="seg">
-                <button :class="{on:fullOn}" @click="setFull(true)">是</button>
-                <button :class="{on:!fullOn, off:!fullOn}" @click="setFull(false)">否</button>
-              </div>
+              <button class="pill" :class="fullOn ? 'p-yes' : 'p-no'" @click="setFull(!fullOn)" title="點擊切換 是／否">{{ fullOn ? '是' : '否' }} <small>⇄</small></button>
             </div>
           </div>
 
@@ -326,7 +344,7 @@ main{flex:1;min-height:0;padding:8px 12px;display:flex}
         <table class="tbl">
           <thead><tr><th>序號</th><th>學號</th><th>姓名</th><th>性別</th><th>出生年月日</th><th>身份證字號</th><th>聯絡電話</th><th>葷素</th><th>全額</th><th>優惠金額</th><th>校對狀態</th><th>疑問</th></tr></thead>
           <tbody>
-            <tr v-for="r in tableRows" :key="r.i" :class="{done:r.s.verified, cur:r.i===idx}" @click="goCard(r.i)">
+            <tr v-for="r in tableRows" :key="r.i" :class="{done:r.s.verified&&!r.s.absent, absent:r.s.absent, cur:r.i===idx}" @click="goCard(r.i)">
               <td>{{ r.s.seq }}</td>
               <td :class="{mod:modS(r.s,'sid'), bad:bad(r.i,'sid')}">{{ r.s.sid }}</td>
               <td class="nm" :class="{mod:modS(r.s,'name'), bad:bad(r.i,'name')}">{{ r.s.name }}</td>
@@ -334,10 +352,10 @@ main{flex:1;min-height:0;padding:8px 12px;display:flex}
               <td :class="{mod:modS(r.s,'birth'), bad:bad(r.i,'birth')}">{{ r.s.birth }}</td>
               <td class="font-id" :class="{mod:modS(r.s,'pid'), bad:bad(r.i,'pid')}">{{ fmtPid(r.s.pid) }}</td>
               <td :class="{mod:modS(r.s,'phone'), bad:bad(r.i,'phone')}">{{ r.s.phone }}</td>
-              <td :class="{mod:modS(r.s,'veg')}"><span class="tag" :class="isVegS(r.s) ? 'veg' : 'no'">{{ isVegS(r.s) ? '🥬 素' : '🍖 葷' }}</span></td>
+              <td :class="{mod:modS(r.s,'veg')}"><span class="tag" :class="isVegS(r.s) ? 'veg' : 'meat'">{{ isVegS(r.s) ? '🥬 素' : '🍖 葷' }}</span></td>
               <td :class="{mod:modS(r.s,'full')}">{{ isTrue(r.s.full) ? 'V' : '' }}</td>
               <td :class="{mod:modS(r.s,'discount')}">{{ r.s.discount ? '$' + r.s.discount : '' }}</td>
-              <td><span class="tag" :class="r.s.verified ? 'ok' : 'no'">{{ r.s.verified ? '✅ 已確認全對' : '未校對' }}</span></td>
+              <td><span class="tag" :class="r.s.absent ? 'ab' : (r.s.verified ? 'ok' : 'no')">{{ r.s.absent ? '🚫 未參加校外教學' : (r.s.verified ? '✅ 已確認全對' : '未校對') }}</span></td>
               <td><span class="tag warn" v-if="issueMap[r.i].length" :title="issueText(r.i)">⚠️ {{ issueMap[r.i].length }}</span></td>
             </tr>
           </tbody>
@@ -351,6 +369,8 @@ main{flex:1;min-height:0;padding:8px 12px;display:flex}
         <div class="stat g"><b>{{ doneCount }}</b><span>已確認全對</span></div>
         <div class="stat"><b>{{ students.length - doneCount }}</b><span>尚未校對</span></div>
         <div class="stat y"><b>{{ modCount }}</b><span>資料有修改</span></div>
+        <div class="stat b"><b>{{ attendCount }}</b><span>參加人數</span></div>
+        <div class="stat"><b>{{ absentCount }}</b><span>🚫 未參加</span></div>
         <div class="stat r"><b>{{ issueCount }}</b><span>仍有疑問</span></div>
         <div class="stat b"><b>{{ vegCount }}</b><span>🥬 素食人數</span></div>
         <div class="stat p"><b>{{ fullCount }}</b><span>全額參加</span></div>
@@ -374,7 +394,7 @@ main{flex:1;min-height:0;padding:8px 12px;display:flex}
         <div class="box">
           <h3>🧑‍🎓 全班一覽（點一下跳到該生）</h3>
           <div class="tiles">
-            <div class="tile" v-for="(s,i) in students" :key="i" :class="{done:s.verified, issue:issueMap[i].length>0, cur:i===idx}" @click="goCard(i)">
+            <div class="tile" v-for="(s,i) in students" :key="i" :class="{done:s.verified, absent:s.absent, issue:issueMap[i].length>0, cur:i===idx}" @click="goCard(i)">
               <i v-if="anyMod(s)"></i><small>{{ s.seq }}</small><b>{{ s.name }}</b>
             </div>
           </div>
@@ -416,6 +436,16 @@ main{flex:1;min-height:0;padding:8px 12px;display:flex}
         <button class="btn" @click="showDone=false">繼續檢視</button>
         <button class="btn green" @click="exportXlsx();showDone=false">⬇️ 匯出 Excel</button>
       </div>
+    </div>
+  </div>
+
+  <div class="mask" v-if="saveHint" @click.self="saveHint=''">
+    <div class="modal">
+      <h2>📥 檔案已下載</h2>
+      <p style="margin:6px 0">{{ saveHint }}</p>
+      <p style="margin:6px 0"><b>放進 Google 雲端硬碟：</b>開啟「檔案」App → 下載 → 把剛匯出的 .xlsx 拖到左側的「Google 雲端硬碟」。</p>
+      <p style="margin:6px 0"><b>每次都想自己選位置：</b>Chrome 設定 → 下載 → 開啟「下載前先詢問儲存位置」。</p>
+      <div class="acts"><button class="btn primary" @click="saveHint=''">知道了</button></div>
     </div>
   </div>
 
@@ -638,7 +668,7 @@ function buildFromRows(rows,fname){
   var hdr=rawHdr.map(function(h){return h.replace(/\s/g,'');});
   var find=function(){var ks=arguments;return hdr.findIndex(function(h){for(var i=0;i<ks.length;i++){if(h.indexOf(ks[i])>=0)return true;}return false;});};
   var map={seq:find('序號'),sid:find('學號'),name:find('姓名'),gender:find('性別'),birth:find('出生','日期'),
-    pid:find('身份證','身分證'),phone:find('電話'),veg:find('吃素'),full:find('全額'),discount:find('優惠')};
+    pid:find('身份證','身分證'),phone:find('電話'),veg:find('吃素'),full:find('全額'),discount:find('優惠'),status:find('校對狀態')};
   var headers=KEYS.map(function(k,i){return map[k]>=0 && str(rawHdr[map[k]]) ? str(rawHdr[map[k]]) : DEFAULT_HEADERS[i];});
   var title='';
   for(var r=0;r<hi && !title;r++){ for(var c=0;c<rows[r].length;c++){ if(str(rows[r][c])){title=str(rows[r][c]);break;} } }
@@ -657,12 +687,13 @@ function buildFromRows(rows,fname){
     if(typeof phoneRaw==='number'){ phoneRaw=String(phoneRaw); if(/^\d{9}$/.test(phoneRaw)) phoneRaw='0'+phoneRaw; }
     var g=str(cell('gender'));
     var gender = /女|^f/i.test(g) ? '女生' : /男|^m/i.test(g) ? '男生' : (pid[1]==='2' ? '女生' : '男生');
+    var ab = map.status>=0 && String(row[map.status]==null?'':row[map.status]).indexOf('未參加')>=0;
     var s={
       seq: seqv,
       sid: str(cell('sid')), name: name, gender: gender,
       birth: normBirth(cell('birth')), pid: pid, phone: fmtPhone(phoneRaw),
       veg: str(cell('veg')), full: str(cell('full')), discount: str(cell('discount')),
-      verified:false
+      verified:ab, absent:ab
     };
     s.orig={}; KEYS.forEach(function(k){s.orig[k]=s[k];});
     list.push(s);
@@ -688,7 +719,7 @@ function createMyApp(){
       var quick=ref(loadQuick()), quickDraft=ref(quick.value.slice());
       var libs={xlsx:!!window.XLSX, exceljs:!!window.ExcelJS};
       var toastTimer=null;
-      var tab=ref('card'), filter=ref('all');
+      var tab=ref('card'), filter=ref('all'), saveHint=ref('');
 
       var cur=computed(function(){return students.value[idx.value];});
       var isFirst=computed(function(){return idx.value<=0;});
@@ -731,6 +762,7 @@ function createMyApp(){
       function clean(t){ return String(t).replace(/^[^一-鿿A-Za-z0-9（(]+/,''); }
       function issuesOf(s,dp,ds){
         var r=[];
+        if(s.absent) return r;
         if(!str(s.name)) r.push({f:'name',t:'姓名未填'});
         if(!str(s.pid)) r.push({f:'pid',t:'身份證字號未填'});
         else{
@@ -759,15 +791,18 @@ function createMyApp(){
       function bad(i,f){ var a=issueMap.value[i]; return !!a && a.some(function(x){return x.f===f;}); }
       function anyMod(s){ return KEYS.some(function(k){return isModS(s,k);}); }
       function isVegS(s){ return isTrue(s.veg); }
-      var vegCount=computed(function(){ return students.value.filter(isVegS).length; });
-      var fullCount=computed(function(){ return students.value.filter(function(s){return isTrue(s.full);}).length; });
-      var discCount=computed(function(){ return students.value.filter(function(s){return str(s.discount)!==''&&str(s.discount)!=='0';}).length; });
+      var absentCount=computed(function(){ return students.value.filter(function(s){return s.absent;}).length; });
+      var attendCount=computed(function(){ return students.value.length-absentCount.value; });
+      var vegCount=computed(function(){ return students.value.filter(function(s){return !s.absent&&isVegS(s);}).length; });
+      var fullCount=computed(function(){ return students.value.filter(function(s){return !s.absent&&isTrue(s.full);}).length; });
+      var discCount=computed(function(){ return students.value.filter(function(s){return !s.absent&&str(s.discount)!==''&&str(s.discount)!=='0';}).length; });
       var chips=computed(function(){
         return [
           {k:'all',t:'全部',n:students.value.length},
           {k:'todo',t:'未校對',n:students.value.length-doneCount.value},
           {k:'issue',t:'有疑問',n:issueCount.value},
-          {k:'mod',t:'有修改',n:modCount.value}
+          {k:'mod',t:'有修改',n:modCount.value},
+          {k:'absent',t:'未參加',n:absentCount.value}
         ];
       });
       var tableRows=computed(function(){
@@ -775,6 +810,7 @@ function createMyApp(){
           if(filter.value==='todo') return !r.s.verified;
           if(filter.value==='issue') return issueMap.value[r.i].length>0;
           if(filter.value==='mod') return anyMod(r.s);
+          if(filter.value==='absent') return !!r.s.absent;
           return true;
         });
       });
@@ -887,6 +923,12 @@ function createMyApp(){
         cur.value[k]='';
         var el=document.getElementById('f-'+k); if(el) el.focus();
       }
+      function setAttend(yes){
+        var s=cur.value; if(!!s.absent===!yes) return;
+        s.absent=!yes; s.verified=!!s.absent;
+        blurActive();
+        showToast(s.absent ? '已標記：未參加校外教學（不列入人數與疑問清單）' : '已取消「未參加」');
+      }
       function toggleGender(){ cur.value.gender = cur.value.gender==='女生' ? '男生' : '女生'; }
       function setVeg(b){ cur.value.veg=b?'✓':''; blurActive(); }
       function setFull(b){ cur.value.full=b?'V':''; blurActive(); }
@@ -976,6 +1018,12 @@ function createMyApp(){
       /* 匯出 Excel（修改過的儲存格鮮黃底 #FFFF99） */
       async function exportXlsx(){
         if(!window.ExcelJS){ showToast('ExcelJS 未載入，無法匯出'); return; }
+        var suggested=(fileName.value||'學生資料').replace(/\.[^.]+$/,'')+'_已校對.xlsx', handle=null, pickErr='';
+        if(window.showSaveFilePicker){
+          try{
+            handle=await window.showSaveFilePicker({suggestedName:suggested,types:[{description:'Excel 活頁簿',accept:{'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':['.xlsx']}}]});
+          }catch(e){ if(e&&e.name==='AbortError'){ showToast('已取消匯出'); return; } handle=null; pickErr=(e&&e.name)||'error'; }
+        }
         try{
           normalizeCur();
           var wb=new ExcelJS.Workbook();
@@ -1001,25 +1049,27 @@ function createMyApp(){
               if((k==='seq'||k==='sid'||k==='discount') && /^[1-9]\d*$/.test(str(v)) ) return Number(v);
               return v;
             });
-            vals.push(s.verified?'已確認全對':'未校對');
+            vals.push(s.absent?'未參加校外教學':(s.verified?'已確認全對':'未校對'));
             row.values=vals;
             for(var c=1;c<=ncol;c++){
               var cell=row.getCell(c), k=KEYS[c-1];
               cell.alignment={horizontal:'center',vertical:'middle'};
               cell.border={top:{style:'thin'},left:{style:'thin'},bottom:{style:'thin'},right:{style:'thin'}};
               if(k && textCols[k]) cell.numFmt='@';
-              if(k==='veg' && isTrue(s.veg)) cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFCCE5FF'}};
+              if(s.absent) cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE5E7EB'}};
+              if(k==='veg' && isTrue(s.veg) && !s.absent) cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFCCE5FF'}};
               if(k && isModS(s,k)) cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFFFFF99'}};
             }
           });
+          var nAtt=students.value.filter(function(s){return !s.absent;}).length, nAbs=students.value.length-nAtt;
           var r0=3+students.value.length+1;
-          [['學生',students.value.length],['老師',1],['家長',0]].forEach(function(x,k){
+          [['學生',nAtt],['老師',1],['家長',0]].forEach(function(x,k){
             var rw=ws.getRow(r0+k);
             rw.getCell(1).value=x[0]; rw.getCell(2).value=x[1]; rw.getCell(3).value='人';
           });
           var tr=ws.getRow(r0+4);
           tr.getCell(1).value='總共';
-          tr.getCell(2).value={formula:'SUM(B'+r0+':B'+(r0+2)+')',result:students.value.length+1};
+          tr.getCell(2).value={formula:'SUM(B'+r0+':B'+(r0+2)+')',result:nAtt+1};
           tr.getCell(3).value='人';
           for(var rr=r0;rr<=r0+4;rr++){
             if(rr===r0+3) continue;
@@ -1029,15 +1079,25 @@ function createMyApp(){
               if(rr===r0+4) sc.border={top:{style:'thin'}};
             }
           }
+          if(nAbs>0){
+            var nc=ws.getRow(r0+6).getCell(1);
+            nc.value='（另有 '+nAbs+' 位未參加校外教學，未列入「學生」人數）';
+            nc.font={italic:true,color:{argb:'FF6B7280'}}; nc.alignment={horizontal:'left'};
+          }
           [8,10,12,8,16,16,16,12,14,16,14].forEach(function(w,i){ ws.getColumn(i+1).width=w; });
           var buf=await wb.xlsx.writeBuffer();
           var blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-          var a=document.createElement('a');
-          a.href=URL.createObjectURL(blob);
-          a.download=(fileName.value||'學生資料').replace(/\.[^.]+$/,'')+'_已校對.xlsx';
-          document.body.appendChild(a); a.click();
-          setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1500);
-          showToast('✅ 已匯出 Excel');
+          if(handle){
+            var wr=await handle.createWritable(); await wr.write(blob); await wr.close();
+            showToast('✅ 已儲存：'+handle.name);
+          }else{
+            var a=document.createElement('a');
+            a.href=URL.createObjectURL(blob);
+            a.download=suggested;
+            document.body.appendChild(a); a.click();
+            setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1500);
+            saveHint.value=(window.showSaveFilePicker ? '目前這個視窗不允許開啟「選擇存檔位置」（'+pickErr+'），可能是在預覽視窗或有限制的環境中開啟。建議把本工具的 .html 檔直接用 Chrome 開啟。' : '這個瀏覽器不支援「選擇存檔位置」（需使用 Chrome 或 Edge）。')+' 檔案已存到下載資料夾：'+suggested;
+          }
         }catch(err){ showToast('匯出失敗：'+(err&&err.message?err.message:err)); }
       }
 
@@ -1060,7 +1120,7 @@ function createMyApp(){
         autosave:autosave, saved:saved, savedInfo:savedInfo, lastSaved:lastSaved,
         resumeSaved:resumeSaved, clearSavedUI:clearSavedUI, toggleAutosave:toggleAutosave,
         onBirthInput:onBirthInput, onBirthBlur:onBirthBlur, onPidInput:onPidInput, onPhoneInput:onPhoneInput, onPhoneBlur:onPhoneBlur,
-        onDiscountInput:onDiscountInput, clearField:clearField, toggleGender:toggleGender,
+        onDiscountInput:onDiscountInput, clearField:clearField, toggleGender:toggleGender, setAttend:setAttend, saveHint:saveHint, absentCount:absentCount, attendCount:attendCount,
         setVeg:setVeg, setFull:setFull, setDiscount:setDiscount, openQuick:openQuick, saveQuick:saveQuick,
         prev:prev, next:next, confirmAndNext:confirmAndNext, onEnter:onEnter,
         onFile:onFile, onDrop:onDrop, loadSample:loadSample, reload:reload, exportXlsx:exportXlsx
