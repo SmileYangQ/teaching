@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>學生資料卡片校對工具</title>
+<style>
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;overflow:hidden;background:#f1f5f9;color:#1e293b;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif}
+[v-cloak]{display:none!important}
+button{font-family:inherit}
+#boot{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font-size:1.3rem;color:#475569;background:#f1f5f9;z-index:50;text-align:center;padding:20px}
+#app{height:100vh;height:100dvh;display:flex;flex-direction:column}
+.font-id{font-family:ui-monospace,"SF Mono",Menlo,Consolas,"Courier New",monospace;letter-spacing:.18em;font-variant-numeric:slashed-zero;font-weight:700}
+
+/* 頂部 */
+.topbar{flex:none;display:flex;align-items:center;gap:10px;padding:6px 14px;background:#1e293b;color:#fff;min-height:50px}
+.brand{flex:1;min-width:0;font-weight:700;font-size:1.15rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar select{font-size:1rem;padding:6px 8px;border-radius:8px;border:0;max-width:210px;background:#fff;color:#1e293b}
+.btn{border:0;border-radius:10px;padding:8px 16px;font-size:1rem;font-weight:700;cursor:pointer;background:#e2e8f0;color:#1e293b;transition:filter .15s,transform .05s}
+.btn:hover:not(:disabled){filter:brightness(.95)}
+.btn:active:not(:disabled){transform:scale(.98)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.primary{background:#2563eb;color:#fff}
+.btn.green{background:#16a34a;color:#fff}
+.btn.dark{background:#475569;color:#fff}
+.progress{flex:none;position:relative;height:22px;background:#cbd5e1}
+.progress .bar{height:100%;background:linear-gradient(90deg,#22c55e,#16a34a);transition:width .3s}
+.progress span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.85rem;font-weight:700;color:#0f172a}
+
+/* 主區 */
+main{flex:1;min-height:0;padding:8px 12px;display:flex}
+.welcome{margin:auto;width:min(680px,100%);background:#fff;border-radius:20px;padding:28px;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.08);border:3px dashed #94a3b8}
+.welcome.drag{border-color:#2563eb;background:#eff6ff}
+.welcome h1{margin:0 0 8px;font-size:1.8rem}
+.welcome p{margin:6px 0;color:#475569;line-height:1.6}
+.welcome .btns{display:flex;gap:12px;justify-content:center;margin-top:18px;flex-wrap:wrap}
+.warnbox{background:#fef2f2;color:#b91c1c;border-radius:10px;padding:8px 12px;margin-top:12px;font-weight:600}
+
+/* 卡片 */
+.card{flex:1;min-width:0;display:flex;flex-direction:column;background:#fff;border:5px solid var(--bd);border-radius:20px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.card-top{flex:none;display:flex;align-items:center;gap:14px;padding:8px 16px;background:var(--bg);border-bottom:3px solid var(--bd)}
+.gender-badge{border:3px solid var(--bd);background:#fff;color:var(--ac);border-radius:999px;padding:6px 18px;font-size:1.4rem;font-weight:800;cursor:pointer;white-space:nowrap}
+.gender-badge small{font-size:.8rem;opacity:.6}
+.seq{white-space:nowrap;color:var(--ac);line-height:1.1}
+.seq small{display:block;font-size:.8rem;font-weight:500;color:#64748b}
+.name-wrap{flex:1;min-width:0;display:flex;flex-direction:column}
+.name-wrap label{font-size:.8rem;color:#64748b;font-weight:600}
+.name-input{width:100%;font-size:2.2rem;font-weight:800;border:2px solid transparent;background:rgba(255,255,255,.7);border-radius:10px;padding:0 10px;height:56px;color:#0f172a;outline:none}
+.name-input:focus{border-color:var(--ac);background:#fff}
+.stamp{white-space:nowrap;font-weight:800;font-size:1.1rem;padding:6px 12px;border-radius:10px;background:#dcfce7;color:#166534}
+.stamp.off{background:#f1f5f9;color:#64748b}
+.card-body{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:6px 22px;padding:10px 18px;overflow:auto;align-content:start}
+.col{display:flex;flex-direction:column;gap:8px;min-width:0}
+.fg{padding:4px 8px 6px;border-radius:12px;border:2px solid transparent}
+.fg.mod{background:#fffbe0;border-color:#facc15}
+.fg label{display:flex;align-items:baseline;gap:8px;font-weight:700;font-size:1rem;color:#334155;margin-bottom:3px}
+.fg label em{font-style:normal;font-size:.8rem;font-weight:600;color:#a16207}
+.row{display:flex;gap:8px;align-items:center}
+.inp{flex:1;min-width:0;height:52px;font-size:1.6rem;padding:0 12px;border:3px solid #cbd5e1;border-radius:12px;background:#fff;color:#0f172a;outline:none}
+.inp:focus{border-color:var(--ac);box-shadow:0 0 0 4px var(--bg)}
+.fg.mod .inp{background:#ffff99}
+.clear{border:2px solid #fca5a5;background:#fff;color:#dc2626;border-radius:10px;padding:0 12px;height:52px;font-size:.95rem;font-weight:700;cursor:pointer;white-space:nowrap}
+.hint{font-size:.78rem;color:#92400e;background:#fef3c7;border-radius:8px;padding:3px 8px;margin-bottom:4px;line-height:1.35}
+.info{min-height:1.4em;margin-top:3px;font-size:.98rem;font-weight:700;color:#64748b}
+.info.ok{color:#15803d}.info.bad{color:#dc2626}.info.warn{color:#d97706}.info.typing{color:#64748b}
+.fg-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg{display:flex;border:3px solid #cbd5e1;border-radius:14px;overflow:hidden;height:56px}
+.seg button{flex:1;border:0;background:#fff;font-size:1.5rem;font-weight:800;color:#64748b;cursor:pointer}
+.seg button.on{background:#16a34a;color:#fff}
+.seg button.on.off{background:#64748b}
+.quick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px}
+.quick button{border:2px solid #cbd5e1;background:#fff;border-radius:10px;padding:6px 12px;font-size:1.1rem;font-weight:800;cursor:pointer;color:#334155}
+.quick button.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.quick button.cfg{border-style:dashed;color:#475569;font-size:.95rem}
+.dollar{font-size:1.6rem;font-weight:800;color:#64748b}
+
+/* 底部 */
+.bottombar{flex:none;display:flex;align-items:center;gap:12px;padding:8px 14px;background:#fff;border-top:2px solid #e2e8f0}
+.bottombar .btn{font-size:1.2rem;padding:12px 22px}
+.bottombar .ok{flex:1;background:#16a34a;color:#fff;font-size:1.4rem}
+.keys{font-size:.78rem;color:#64748b;max-width:190px;line-height:1.3}
+
+/* Modal / Toast */
+.mask{position:fixed;inset:0;background:rgba(15,23,42,.55);display:flex;align-items:center;justify-content:center;z-index:40;padding:16px}
+.modal{background:#fff;border-radius:18px;padding:22px;width:min(460px,100%);box-shadow:0 20px 50px rgba(0,0,0,.3)}
+.modal h2{margin:0 0 10px;font-size:1.4rem}
+.modal .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+.modal .grid input{height:48px;font-size:1.4rem;padding:0 10px;border:3px solid #cbd5e1;border-radius:10px;width:100%}
+.modal .acts{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.toast{position:fixed;left:50%;top:64px;transform:translateX(-50%);background:#0f172a;color:#fff;padding:10px 20px;border-radius:999px;font-weight:700;z-index:60;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+
+@media (max-width:820px){
+  .card-body{grid-template-columns:1fr}
+  .keys{display:none}
+  .brand{font-size:1rem}
+}
+@media (max-height:700px){
+  .inp{height:46px;font-size:1.4rem}.clear{height:46px}
+  .name-input{height:48px;font-size:1.9rem}
+  .seg{height:48px}
+  .card-body{padding:6px 14px;gap:2px 18px}
+  .bottombar .btn{padding:9px 18px}
+}
+</style>
+</head>
+<body>
+<div id="boot"><div>⏳ 正在載入元件…</div></div>
+
+<div id="app" v-cloak>
+  <!-- 頂部導覽 -->
+  <header class="topbar">
+    <div class="brand">🧾 {{ title || '學生資料卡片校對工具' }}</div>
+    <template v-if="students.length">
+      <select v-model.number="idx" title="快速跳到某位學生">
+        <option v-for="(s,i) in students" :key="i" :value="i">{{ s.verified ? '✓' : '　' }} {{ s.seq }} {{ s.name }}{{ problem(s) ? ' ⚠️' : '' }}</option>
+      </select>
+      <button class="btn green" @click="exportXlsx">⬇️ 匯出 Excel</button>
+      <button class="btn dark" @click="reload">📂 重新載入</button>
+    </template>
+  </header>
+  <div class="progress" v-if="students.length">
+    <div class="bar" :style="{width:pct+'%'}"></div>
+    <span>已確認 {{ doneCount }} / {{ students.length }}　（{{ pct }}%）</span>
+  </div>
+
+  <main>
+    <!-- 歡迎頁 -->
+    <section v-if="!students.length" class="welcome" :class="{drag:dragging}"
+      @dragover.prevent="dragging=true" @dragleave="dragging=false" @drop.prevent="onDrop">
+      <h1>📋 學生資料卡片校對工具</h1>
+      <p>載入班級／校外教學學生資料 Excel（.xlsx / .xls），以大字體卡片逐一檢查、更正與核對。</p>
+      <p>格式：第 1 列為大標題，第 2 列為表頭（序號、學號、姓名、性別、出生年月日、身份證字號、聯絡電話、是否吃素?、全額參加、優惠金額）。</p>
+      <p>👉 把檔案拖曳到這裡，或點下方按鈕選擇檔案。</p>
+      <div class="btns">
+        <label class="btn primary" style="font-size:1.3rem;padding:14px 28px">📂 選擇 Excel 檔案
+          <input type="file" accept=".xlsx,.xls,.xlsm,.csv" style="display:none" @change="onFile">
+        </label>
+        <button class="btn" style="font-size:1.1rem" @click="loadSample">🧪 載入範例資料</button>
+      </div>
+      <div class="warnbox" v-if="loadError">{{ loadError }}</div>
+      <div class="warnbox" v-if="!libs.xlsx">⚠️ SheetJS 載入失敗，無法讀取 Excel，請檢查網路後重新整理。</div>
+      <div class="warnbox" v-if="!libs.exceljs">⚠️ ExcelJS 載入失敗，將無法匯出 Excel，請檢查網路後重新整理。</div>
+    </section>
+
+    <!-- 卡片 -->
+    <section v-else class="card" :style="themeStyle">
+      <div class="card-top">
+        <button class="gender-badge" @click="toggleGender" title="點擊切換性別">{{ cur.gender === '女生' ? '♀ 女生' : '♂ 男生' }} <small>⇄</small></button>
+        <div class="seq text-3xl font-bold" :class="{}"><span style="font-size:1.9rem;font-weight:800">序號 {{ cur.seq }}</span><small>第 {{ idx + 1 }} / {{ students.length }} 張</small></div>
+        <div class="name-wrap">
+          <label>姓名 <em v-if="isMod('name')" style="font-style:normal;color:#a16207">✏️ 已修改（原：{{ origOf('name') }}）</em></label>
+          <input id="f-name" class="name-input text-3xl font-bold" :style="isMod('name') ? 'background:#ffff99' : ''" type="text" autocomplete="off" spellcheck="false"
+            v-model="cur.name" @keydown.enter="onEnter('name',$event)">
+        </div>
+        <div class="stamp" :class="{off:!cur.verified}">{{ cur.verified ? '✅ 已確認' : '未校對' }}</div>
+      </div>
+
+      <div class="card-body">
+        <!-- 左欄 -->
+        <div class="col">
+          <div class="fg" :class="{mod:isMod('sid')}">
+            <label>學號 <em v-if="isMod('sid')">✏️ 已修改（原：{{ origOf('sid') }}）</em></label>
+            <div class="row">
+              <input id="f-sid" class="inp" type="text" autocomplete="off" v-model="cur.sid" @keydown.enter="onEnter('sid',$event)">
+            </div>
+          </div>
+
+          <div class="fg" :class="{mod:isMod('birth')}">
+            <label>出生年月日 <em v-if="isMod('birth')">✏️ 已修改（原：{{ origOf('birth') }}）</em></label>
+            <div class="hint">💡 提示：請輸入 7 位數字（例如 1040506；1月請打 01，3日請打 03），離焦將自動格式化與計算年齡</div>
+            <div class="row">
+              <input id="f-birth" class="inp" type="text" inputmode="numeric" maxlength="9" placeholder="1040506" autocomplete="off"
+                :value="cur.birth" @input="onBirthInput" @blur="onBirthBlur" @keydown.enter="onEnter('birth',$event)">
+              <button class="clear" @click="clearField('birth')">✕ 清除</button>
+            </div>
+            <div class="info" :class="birthInfo.level">{{ birthInfo.text }}</div>
+          </div>
+
+          <div class="fg" :class="{mod:isMod('phone')}">
+            <label>聯絡電話 <em v-if="isMod('phone')">✏️ 已修改（原：{{ origOf('phone') }}）</em></label>
+            <div class="row">
+              <input id="f-phone" class="inp" type="text" inputmode="tel" maxlength="14" placeholder="0912345678" autocomplete="off"
+                :value="cur.phone" @input="onPhoneInput" @blur="onPhoneBlur" @keydown.enter="onEnter('phone',$event)">
+            </div>
+            <div class="info" :class="phoneInfo.level">{{ phoneInfo.text }}</div>
+          </div>
+        </div>
+
+        <!-- 右欄 -->
+        <div class="col">
+          <div class="fg" :class="{mod:isMod('pid')}">
+            <label>身份證字號 <em v-if="isMod('pid')">✏️ 已修改（原：{{ origOf('pid') }}）</em></label>
+            <div class="row">
+              <input id="f-pid" class="inp font-id" type="text" maxlength="10" placeholder="A123456789" autocomplete="off" autocapitalize="characters" spellcheck="false"
+                :value="cur.pid" @input="onPidInput" @keydown.enter="onEnter('pid',$event)">
+              <button class="clear" @click="clearField('pid')">✕ 清除</button>
+            </div>
+            <div class="info" :class="pidInfo.level">{{ pidInfo.text }}</div>
+          </div>
+
+          <div class="fg-row">
+            <div class="fg" :class="{mod:isMod('veg')}">
+              <label>是否吃素? <em v-if="isMod('veg')">✏️ 原：{{ origOf('veg') }}</em></label>
+              <div class="seg">
+                <button :class="{on:vegOn}" @click="setVeg(true)">是</button>
+                <button :class="{on:!vegOn, off:!vegOn}" @click="setVeg(false)">否</button>
+              </div>
+            </div>
+            <div class="fg" :class="{mod:isMod('full')}">
+              <label>全額參加 (V) <em v-if="isMod('full')">✏️ 原：{{ origOf('full') }}</em></label>
+              <div class="seg">
+                <button :class="{on:fullOn}" @click="setFull(true)">是</button>
+                <button :class="{on:!fullOn, off:!fullOn}" @click="setFull(false)">否</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="fg" :class="{mod:isMod('discount')}">
+            <label>優惠參加金額 <em v-if="isMod('discount')">✏️ 已修改（原：{{ origOf('discount') }}）</em></label>
+            <div class="quick">
+              <button v-for="(a,i) in quick" :key="i" :class="{on:cur.discount===String(a)}" @click="setDiscount(String(a))">${{ a }}</button>
+              <button :class="{on:cur.discount===''}" @click="setDiscount('')">無優惠</button>
+              <button class="cfg" @click="openQuick">⚙️ 自訂金額</button>
+            </div>
+            <div class="row">
+              <span class="dollar">$</span>
+              <input id="f-discount" class="inp" type="text" inputmode="numeric" placeholder="自行輸入金額" autocomplete="off"
+                :value="cur.discount" @input="onDiscountInput" @keydown.enter="onEnter('discount',$event)">
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 底部按鈕列 -->
+  <footer class="bottombar" v-if="students.length">
+    <button class="btn" :disabled="isFirst" @click="prev">◀ 上一張</button>
+    <button class="btn ok" @click="confirmAndNext">✅ 確認全對（下一張）</button>
+    <button class="btn" :disabled="isLast" @click="next">下一張 ▶</button>
+    <div class="keys">← → 切換卡片<br>Space / Enter：全對下一張<br>輸入框 Enter：跳下一欄</div>
+  </footer>
+
+  <!-- 自訂快捷金額 -->
+  <div class="mask" v-if="showQuick" @click.self="showQuick=false">
+    <div class="modal">
+      <h2>⚙️ 自訂快捷金額</h2>
+      <div>修改 4 顆快捷按鈕的常用金額（僅限數字）：</div>
+      <div class="grid"><input v-for="(a,i) in quickDraft" :key="i" type="text" inputmode="numeric" v-model="quickDraft[i]"></div>
+      <div class="acts">
+        <button class="btn" @click="quickDraft=['150','300','500','800']">恢復預設</button>
+        <button class="btn" @click="showQuick=false">取消</button>
+        <button class="btn primary" @click="saveQuick">儲存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 全部完成 -->
+  <div class="mask" v-if="showDone" @click.self="showDone=false">
+    <div class="modal" style="text-align:center">
+      <h2>🎉 全部校對完成！</h2>
+      <p>共 {{ students.length }} 位學生已確認，其中 {{ modCount }} 位資料有修改。<br>修改過的欄位在匯出的 Excel 中會以黃底標示。</p>
+      <div class="acts" style="justify-content:center">
+        <button class="btn" @click="showDone=false">繼續檢視</button>
+        <button class="btn green" @click="exportXlsx();showDone=false">⬇️ 匯出 Excel</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" v-if="toast">{{ toast }}</div>
+</div>
+
+<script>
+/* ============ CDN 載入與備援 ============ */
+var LIBS = [
+  { name:'tailwind', optional:true, check:function(){return true;}, urls:['https://cdn.tailwindcss.com','https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4'] },
+  { name:'Vue', check:function(){return !!window.Vue;}, urls:['https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.prod.js','https://unpkg.com/vue@3/dist/vue.global.prod.js'] },
+  { name:'XLSX', check:function(){return !!window.XLSX;}, urls:['https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js','https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js'] },
+  { name:'ExcelJS', check:function(){return !!window.ExcelJS;}, urls:['https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js','https://unpkg.com/exceljs@4.4.0/dist/exceljs.min.js'] }
+];
+function loadScript(url){
+  return new Promise(function(resolve,reject){
+    var s=document.createElement('script'), done=false;
+    var t=setTimeout(function(){ if(!done){done=true; s.remove(); reject(new Error('timeout '+url));} },10000);
+    s.src=url;
+    s.onload=function(){ if(!done){done=true; clearTimeout(t); resolve();} };
+    s.onerror=function(){ if(!done){done=true; clearTimeout(t); s.remove(); reject(new Error('fail '+url));} };
+    document.head.appendChild(s);
+  });
+}
+async function ensureLib(lib){
+  for(var i=0;i<lib.urls.length;i++){
+    try{ await loadScript(lib.urls[i]); if(lib.check()) return true; }catch(e){}
+  }
+  return false;
+}
+
+/* ============ 常數與工具函式 ============ */
+var DEFAULT_HEADERS=['序號','學號','姓名','性別','民國日期（簡稱）','身份證字號','聯絡電話','是否吃素?','全額參加請打V','優惠參加請打金額'];
+var KEYS=['seq','sid','name','gender','birth','pid','phone','veg','full','discount'];
+var ORDER=['name','sid','birth','pid','phone','discount'];
+var LETTER={A:10,B:11,C:12,D:13,E:14,F:15,G:16,H:17,I:34,J:18,K:19,L:20,M:21,N:22,O:35,P:23,Q:24,R:25,S:26,T:27,U:28,V:29,W:32,X:30,Y:31,Z:33};
+
+var str=function(v){return v==null?'':String(v).trim();};
+var pad=function(n,l){return String(n).padStart(l,'0');};
+var fmtROC=function(y,m,d){return pad(y,3)+'/'+pad(m,2)+'/'+pad(d,2);};
+var isTrue=function(v){var t=str(v);return !!t && !/^(否|無|无|沒有|没有|n|no|0|false|x|×|✗|-|－)$/i.test(t);};
+
+/* 載入時寬鬆解析出生日期 → YYY/MM/DD */
+function normBirth(v){
+  if(v==null||v==='') return '';
+  if(v instanceof Date && !isNaN(v)) return fmtROC(v.getFullYear()-1911,v.getMonth()+1,v.getDate());
+  if(typeof v==='number' && v>20000 && v<70000){
+    var d0=new Date(Math.round((v-25569)*86400000));
+    return fmtROC(d0.getUTCFullYear()-1911,d0.getUTCMonth()+1,d0.getUTCDate());
+  }
+  var s=str(v);
+  var m=s.match(/(\d{2,4})\s*[年\/\-.]\s*(\d{1,2})\s*[月\/\-.]\s*(\d{1,2})/);
+  if(m){ var y=+m[1]; if(y>1911) y-=1911; return fmtROC(y,+m[2],+m[3]); }
+  var d=s.replace(/\D/g,'');
+  if(d===s){
+    if(/^\d{7}$/.test(d)) return d.slice(0,3)+'/'+d.slice(3,5)+'/'+d.slice(5);
+    if(/^\d{6}$/.test(d)) return '0'+d.slice(0,2)+'/'+d.slice(2,4)+'/'+d.slice(4);
+    if(/^\d{8}$/.test(d)) return fmtROC(+d.slice(0,4)-1911,+d.slice(4,6),+d.slice(6));
+  }
+  return s;
+}
+function fmtPhone(v){
+  var raw=str(v); if(!raw) return '';
+  if(raw.replace(/[\d\-\s]/g,'')) return raw;
+  var d=raw.replace(/\D/g,'');
+  if(/^09\d{8}$/.test(d)) return d.replace(/^(\d{4})(\d{3})(\d{3})$/,'$1-$2-$3');
+  if(/^0(37|49|82|89)\d{6}$/.test(d)) return d.slice(0,3)+'-'+d.slice(3,6)+'-'+d.slice(6);
+  if(/^0[2-8]\d{7,8}$/.test(d)){
+    var rest=d.slice(2);
+    return d.slice(0,2)+'-'+(rest.length===8 ? rest.slice(0,4)+'-'+rest.slice(4) : rest.slice(0,3)+'-'+rest.slice(3));
+  }
+  return raw;
+}
+function checkBirth(b){
+  b=str(b); if(!b) return {level:'empty',text:''};
+  if(/^\d+$/.test(b) && b.length<7) return {level:'typing',text:'⌨️ 輸入中…（已輸入 '+b.length+' / 7 碼）'};
+  var m=b.match(/^(\d{2,3})\/(\d{1,2})\/(\d{1,2})$/);
+  var bad={level:'bad',text:'⚠️ 無效日期'};
+  if(!m) return bad;
+  var y=+m[1], mo=+m[2], d=+m[3], Y=y+1911;
+  if(mo<1||mo>12||d<1||d>new Date(Y,mo,0).getDate()) return bad;
+  var now=new Date(), age=now.getFullYear()-Y;
+  if(now.getMonth()+1<mo || (now.getMonth()+1===mo && now.getDate()<d)) age--;
+  if(age<0) return {level:'bad',text:'⚠️ 無效日期（晚於今天）'};
+  return {level:'ok',text:'🎂 滿 '+age+' 歲 ('+y+'年次)'};
+}
+function checkPid(p,gender){
+  p=str(p); if(!p) return {level:'empty',text:''};
+  var bad=function(t){return {level:'bad',text:t};};
+  if(!/^[A-Z]/.test(p)) return bad('⚠️ 首碼必須是英文字母');
+  if(p.length>=2){
+    if(p[1]!=='1' && p[1]!=='2') return bad('⚠️ 第 2 碼必須是 1（男）或 2（女）');
+    var need = gender==='女生' ? '2' : '1';
+    if(p[1]!==need) return bad('⚠️ 第 2 碼與性別不符（'+gender+'應為 '+need+'）');
+  }
+  if(p.length<10) return {level:'typing',text:'⌨️ 已輸入 '+p.length+' / 10 碼'};
+  if(!/^[A-Z][12]\d{8}$/.test(p)) return bad('⚠️ 格式錯誤（後 8 碼須為數字）');
+  var c=LETTER[p[0]], sum=Math.floor(c/10)+(c%10)*9;
+  for(var i=1;i<=8;i++) sum+=(+p[i])*(9-i);
+  sum+=+p[9];
+  if(sum%10!==0) return bad('❌ 檢查碼錯誤，請核對身份證字號');
+  return {level:'ok',text:'✅ 身份證字號正確'};
+}
+function checkPhone(v){
+  var raw=str(v); if(!raw) return {level:'empty',text:''};
+  var d=raw.replace(/\D/g,'');
+  if(/^09\d{8}$/.test(d)) return {level:'ok',text:'✅ 行動電話'};
+  if(/^0[2-8]\d{7,8}$/.test(d)) return {level:'ok',text:'✅ 市內電話'};
+  return {level:'warn',text:'⚠️ 長度疑有誤'};
+}
+function norm(f,v){
+  if(f==='veg'||f==='full') return isTrue(v)?'1':'0';
+  return str(v);
+}
+function loadQuick(){
+  try{ var a=JSON.parse(localStorage.getItem('scv_quick')); if(Array.isArray(a)&&a.length===4) return a.map(String); }catch(e){}
+  return ['150','300','500','800'];
+}
+
+/* 把「陣列的陣列」轉成學生資料 */
+function buildFromRows(rows,fname){
+  var hi=-1;
+  for(var i=0;i<Math.min(rows.length,8);i++){
+    if(rows[i].some(function(c){return String(c).replace(/\s/g,'').indexOf('姓名')>=0;})){hi=i;break;}
+  }
+  if(hi<0) throw new Error('找不到表頭列：請確認第 2 列含有「姓名」欄位。');
+  var rawHdr=rows[hi].map(function(c){return String(c);});
+  var hdr=rawHdr.map(function(h){return h.replace(/\s/g,'');});
+  var find=function(){var ks=arguments;return hdr.findIndex(function(h){for(var i=0;i<ks.length;i++){if(h.indexOf(ks[i])>=0)return true;}return false;});};
+  var map={seq:find('序號'),sid:find('學號'),name:find('姓名'),gender:find('性別'),birth:find('出生','日期'),
+    pid:find('身份證','身分證'),phone:find('電話'),veg:find('吃素'),full:find('全額'),discount:find('優惠')};
+  var headers=KEYS.map(function(k,i){return map[k]>=0 && str(rawHdr[map[k]]) ? str(rawHdr[map[k]]) : DEFAULT_HEADERS[i];});
+  var title='';
+  for(var r=0;r<hi && !title;r++){ for(var c=0;c<rows[r].length;c++){ if(str(rows[r][c])){title=str(rows[r][c]);break;} } }
+  if(!title) title=fname.replace(/\.[^.]+$/,'');
+
+  var list=[];
+  rows.slice(hi+1).forEach(function(row){
+    var cell=function(k){return map[k]>=0 ? row[map[k]] : '';};
+    var name=str(cell('name'));
+    var pid=str(cell('pid')).toUpperCase().replace(/[^A-Z0-9]/g,'');
+    if(!name && !str(cell('sid')) && !pid) return;
+    var phoneRaw=cell('phone');
+    if(typeof phoneRaw==='number'){ phoneRaw=String(phoneRaw); if(/^\d{9}$/.test(phoneRaw)) phoneRaw='0'+phoneRaw; }
+    var g=str(cell('gender'));
+    var gender = /女|^f/i.test(g) ? '女生' : /男|^m/i.test(g) ? '男生' : (pid[1]==='2' ? '女生' : '男生');
+    var s={
+      seq: str(cell('seq')) || String(list.length+1),
+      sid: str(cell('sid')), name: name, gender: gender,
+      birth: normBirth(cell('birth')), pid: pid, phone: fmtPhone(phoneRaw),
+      veg: str(cell('veg')), full: str(cell('full')), discount: str(cell('discount')),
+      verified:false
+    };
+    s.orig={}; KEYS.forEach(function(k){s.orig[k]=s[k];});
+    list.push(s);
+  });
+  if(!list.length) throw new Error('表頭之後沒有找到任何學生資料列。');
+  return {title:title,headers:headers,list:list};
+}
+
+/* ============ Vue 應用程式 ============ */
+function createMyApp(){
+  var V=Vue, ref=V.ref, computed=V.computed, watch=V.watch, nextTick=V.nextTick, onMounted=V.onMounted, onBeforeUnmount=V.onBeforeUnmount;
+  return V.createApp({
+    setup:function(){
+      var students=ref([]), idx=ref(0), title=ref(''), fileName=ref(''), headers=ref(DEFAULT_HEADERS.slice());
+      var loadError=ref(''), toast=ref(''), dragging=ref(false), showQuick=ref(false), showDone=ref(false);
+      var quick=ref(loadQuick()), quickDraft=ref(quick.value.slice());
+      var libs={xlsx:!!window.XLSX, exceljs:!!window.ExcelJS};
+      var toastTimer=null;
+
+      var cur=computed(function(){return students.value[idx.value];});
+      var isFirst=computed(function(){return idx.value<=0;});
+      var isLast=computed(function(){return idx.value>=students.value.length-1;});
+      var doneCount=computed(function(){return students.value.filter(function(s){return s.verified;}).length;});
+      var pct=computed(function(){return students.value.length?Math.round(doneCount.value*100/students.value.length):0;});
+
+      function showToast(msg){ toast.value=msg; clearTimeout(toastTimer); toastTimer=setTimeout(function(){toast.value='';},1800); }
+      function blurActive(){ var a=document.activeElement; if(a && a!==document.body && a.blur) a.blur(); }
+
+      /* 異動追蹤 */
+      function isModS(s,f){ return norm(f,s[f])!==norm(f,s.orig[f]); }
+      function isMod(f){ return !!cur.value && isModS(cur.value,f); }
+      function origOf(f){
+        var v=cur.value.orig[f];
+        if(f==='veg'||f==='full') return isTrue(v)?'是':'否';
+        return str(v)||'（空白）';
+      }
+      var modCount=computed(function(){return students.value.filter(function(s){return KEYS.some(function(k){return isModS(s,k);});}).length;});
+
+      /* 主題 */
+      var themeStyle=computed(function(){
+        return cur.value && cur.value.gender==='女生'
+          ? {'--bg':'#FFF5F5','--bd':'#F687B3','--ac':'#B83280'}
+          : {'--bg':'#EBF8FF','--bd':'#63B3ED','--ac':'#2B6CB0'};
+      });
+
+      /* 驗證 */
+      var birthInfo=computed(function(){return cur.value?checkBirth(cur.value.birth):{level:'empty',text:''};});
+      var pidInfo=computed(function(){return cur.value?checkPid(cur.value.pid,cur.value.gender):{level:'empty',text:''};});
+      var phoneInfo=computed(function(){return cur.value?checkPhone(cur.value.phone):{level:'empty',text:''};});
+      function problem(s){
+        return checkPid(s.pid,s.gender).level==='bad' || checkBirth(s.birth).level==='bad' || checkPhone(s.phone).level==='warn';
+      }
+      var vegOn=computed(function(){return cur.value?isTrue(cur.value.veg):false;});
+      var fullOn=computed(function(){return cur.value?isTrue(cur.value.full):false;});
+
+      /* 欄位事件 */
+      function onBirthInput(e){
+        var v=e.target.value.replace(/[^\d\/]/g,'');
+        if(/^\d{7}$/.test(v)) v=v.slice(0,3)+'/'+v.slice(3,5)+'/'+v.slice(5);
+        e.target.value=v; cur.value.birth=v;
+      }
+      function onBirthBlur(){ cur.value.birth=normBirth(cur.value.birth); }
+      function onPidInput(e){
+        var v=e.target.value.replace(/[^A-Za-z0-9]/g,'').toUpperCase().slice(0,10);
+        e.target.value=v; cur.value.pid=v;
+      }
+      function onPhoneInput(e){
+        var v=e.target.value.replace(/[^\d\-\s]/g,'');
+        e.target.value=v; cur.value.phone=v;
+      }
+      function onPhoneBlur(){ cur.value.phone=fmtPhone(cur.value.phone); }
+      function onDiscountInput(e){
+        var v=e.target.value.replace(/\D/g,'');
+        e.target.value=v; cur.value.discount=v;
+      }
+      function clearField(k){
+        cur.value[k]='';
+        var el=document.getElementById('f-'+k); if(el) el.focus();
+      }
+      function toggleGender(){ cur.value.gender = cur.value.gender==='女生' ? '男生' : '女生'; }
+      function setVeg(b){ cur.value.veg=b?'是':'否'; blurActive(); }
+      function setFull(b){ cur.value.full=b?'V':''; blurActive(); }
+      function setDiscount(v){ cur.value.discount=v; blurActive(); }
+
+      /* 快捷金額設定 */
+      function openQuick(){ quickDraft.value=quick.value.slice(); showQuick.value=true; }
+      function saveQuick(){
+        var a=quickDraft.value.map(function(v){return String(v).replace(/\D/g,'');});
+        if(a.some(function(v){return !v;})){ showToast('請把 4 個金額都填上數字'); return; }
+        quick.value=a;
+        try{ localStorage.setItem('scv_quick',JSON.stringify(a)); }catch(e){}
+        showQuick.value=false; showToast('已更新快捷金額');
+      }
+
+      /* 導航 */
+      function normalizeCur(){
+        if(!cur.value) return;
+        cur.value.birth=normBirth(cur.value.birth);
+        cur.value.phone=fmtPhone(cur.value.phone);
+      }
+      function prev(){ if(!isFirst.value){ normalizeCur(); idx.value--; } }
+      function next(){ if(!isLast.value){ normalizeCur(); idx.value++; } }
+      function confirmAndNext(){
+        normalizeCur();
+        cur.value.verified=true;
+        if(!isLast.value){ idx.value++; showToast('✅ 已確認'); }
+        else if(doneCount.value===students.value.length){ showDone.value=true; blurActive(); }
+        else showToast('已是最後一張，尚有 '+(students.value.length-doneCount.value)+' 張未校對');
+      }
+      function onEnter(key,e){
+        if(e.isComposing||e.keyCode===229) return;
+        e.preventDefault();
+        var i=ORDER.indexOf(key);
+        if(i<ORDER.length-1){
+          var el=document.getElementById('f-'+ORDER[i+1]);
+          if(el){ el.focus(); if(el.select) el.select(); }
+        } else confirmAndNext();
+      }
+      function onKey(e){
+        if(!students.value.length || showQuick.value || showDone.value) return;
+        var tag=e.target && e.target.tagName;
+        var inField = tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT';
+        if(inField){
+          if(e.altKey && e.key==='ArrowLeft'){ e.preventDefault(); prev(); }
+          else if(e.altKey && e.key==='ArrowRight'){ e.preventDefault(); next(); }
+          return;
+        }
+        if(e.key==='ArrowLeft'){ e.preventDefault(); prev(); }
+        else if(e.key==='ArrowRight'){ e.preventDefault(); next(); }
+        else if((e.key===' '||e.key==='Enter') && tag!=='BUTTON'){ e.preventDefault(); confirmAndNext(); }
+      }
+      watch(idx,function(){ nextTick(blurActive); });
+
+      /* 檔案載入 */
+      function applyBuilt(b,fname){
+        students.value=b.list; title.value=b.title; headers.value=b.headers; fileName.value=fname;
+        idx.value=0; loadError.value=''; showDone.value=false;
+        showToast('已載入 '+b.list.length+' 位學生');
+      }
+      async function readFile(file){
+        loadError.value='';
+        if(!window.XLSX){ loadError.value='SheetJS 尚未載入，無法讀取 Excel。'; return; }
+        try{
+          var buf=await file.arrayBuffer();
+          var wb=XLSX.read(buf,{type:'array'});
+          var ws=wb.Sheets[wb.SheetNames[0]];
+          var rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:true,blankrows:false});
+          applyBuilt(buildFromRows(rows,file.name),file.name);
+        }catch(err){ loadError.value='❌ 讀取失敗：'+(err&&err.message?err.message:err); }
+      }
+      function onFile(e){ var f=e.target.files&&e.target.files[0]; if(f) readFile(f); e.target.value=''; }
+      function onDrop(e){ dragging.value=false; var f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(f) readFile(f); }
+      function loadSample(){
+        var rows=[['範例班 校外教學一覽表'],DEFAULT_HEADERS,
+          [1,'40101','王小明','男生','104/05/06','A123456789','0912345678','否','V',''],
+          [2,'40102','林小美','女生','1040230','A223456781','0223456789','是','','300'],
+          [3,'40103','陳大文','男生','104/11/20','B123456789','091234567','否','','500'],
+          [4,'40104','張雅婷','女生','104/07/15','A123456789','0987654321','否','V','']];
+        applyBuilt(buildFromRows(rows,'範例資料.xlsx'),'範例資料.xlsx');
+      }
+      function reload(){
+        if(students.value.length && !window.confirm('目前的校對進度若尚未匯出將會遺失，確定要重新載入嗎？')) return;
+        students.value=[]; idx.value=0; fileName.value=''; title.value='';
+      }
+
+      /* 匯出 Excel（修改過的儲存格鮮黃底 #FFFF99） */
+      async function exportXlsx(){
+        if(!window.ExcelJS){ showToast('ExcelJS 未載入，無法匯出'); return; }
+        try{
+          normalizeCur();
+          var wb=new ExcelJS.Workbook();
+          var ws=wb.addWorksheet('校外教學一覽表');
+          var heads=headers.value.concat(['校對狀態']);
+          var ncol=heads.length;
+          ws.mergeCells(1,1,1,ncol);
+          var t=ws.getCell(1,1);
+          t.value=title.value; t.font={bold:true,size:16}; t.alignment={horizontal:'center',vertical:'middle'};
+          ws.getRow(1).height=30;
+          var hr=ws.getRow(2); hr.values=heads; hr.height=24;
+          hr.eachCell(function(c){
+            c.font={bold:true}; c.alignment={horizontal:'center',vertical:'middle',wrapText:true};
+            c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFE2E8F0'}};
+            c.border={top:{style:'thin'},left:{style:'thin'},bottom:{style:'thin'},right:{style:'thin'}};
+          });
+          var textCols={sid:1,birth:1,pid:1,phone:1};
+          students.value.forEach(function(s,i){
+            var row=ws.getRow(3+i);
+            var vals=KEYS.map(function(k){
+              var v=s[k];
+              if((k==='seq'||k==='sid'||k==='discount') && /^[1-9]\d*$/.test(str(v)) ) return Number(v);
+              return v;
+            });
+            vals.push(s.verified?'已確認全對':'未校對');
+            row.values=vals;
+            for(var c=1;c<=ncol;c++){
+              var cell=row.getCell(c), k=KEYS[c-1];
+              cell.alignment={horizontal:'center',vertical:'middle'};
+              cell.border={top:{style:'thin'},left:{style:'thin'},bottom:{style:'thin'},right:{style:'thin'}};
+              if(k && textCols[k]) cell.numFmt='@';
+              if(k && isModS(s,k)) cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFFFFF99'}};
+            }
+          });
+          [8,10,12,8,16,16,16,12,14,16,14].forEach(function(w,i){ ws.getColumn(i+1).width=w; });
+          var buf=await wb.xlsx.writeBuffer();
+          var blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+          var a=document.createElement('a');
+          a.href=URL.createObjectURL(blob);
+          a.download=(fileName.value||'學生資料').replace(/\.[^.]+$/,'')+'_已校對.xlsx';
+          document.body.appendChild(a); a.click();
+          setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1500);
+          showToast('✅ 已匯出 Excel');
+        }catch(err){ showToast('匯出失敗：'+(err&&err.message?err.message:err)); }
+      }
+
+      function beforeUnload(e){
+        if(students.value.length && (doneCount.value>0 || modCount.value>0)){ e.preventDefault(); e.returnValue=''; }
+      }
+      onMounted(function(){ window.addEventListener('keydown',onKey); window.addEventListener('beforeunload',beforeUnload); });
+      onBeforeUnmount(function(){ window.removeEventListener('keydown',onKey); window.removeEventListener('beforeunload',beforeUnload); });
+
+      return {
+        students:students, idx:idx, title:title, cur:cur, libs:libs, loadError:loadError, toast:toast, dragging:dragging,
+        showQuick:showQuick, showDone:showDone, quick:quick, quickDraft:quickDraft,
+        isFirst:isFirst, isLast:isLast, doneCount:doneCount, pct:pct, modCount:modCount, themeStyle:themeStyle,
+        birthInfo:birthInfo, pidInfo:pidInfo, phoneInfo:phoneInfo, vegOn:vegOn, fullOn:fullOn,
+        isMod:isMod, origOf:origOf, problem:problem,
+        onBirthInput:onBirthInput, onBirthBlur:onBirthBlur, onPidInput:onPidInput, onPhoneInput:onPhoneInput, onPhoneBlur:onPhoneBlur,
+        onDiscountInput:onDiscountInput, clearField:clearField, toggleGender:toggleGender,
+        setVeg:setVeg, setFull:setFull, setDiscount:setDiscount, openQuick:openQuick, saveQuick:saveQuick,
+        prev:prev, next:next, confirmAndNext:confirmAndNext, onEnter:onEnter,
+        onFile:onFile, onDrop:onDrop, loadSample:loadSample, reload:reload, exportXlsx:exportXlsx
+      };
+    }
+  });
+}
+
+/* ============ 啟動 ============ */
+(async function(){
+  var boot=document.getElementById('boot');
+  await Promise.all(LIBS.map(ensureLib));
+  if(!window.Vue){
+    boot.innerHTML='<div>❌ 無法載入 Vue（網路可能被封鎖）。</div><div style="font-size:1rem">請確認網路連線後再試一次。</div>'
+      +'<button onclick="location.reload()" style="font-size:1.1rem;padding:10px 20px;border-radius:10px;border:0;background:#2563eb;color:#fff;cursor:pointer">🔄 重新整理</button>';
+    return;
+  }
+  try{ createMyApp().mount('#app'); boot.remove(); }
+  catch(e){ boot.textContent='啟動失敗：'+(e&&e.message?e.message:e); }
+})();
+</script>
+</body>
+</html>
