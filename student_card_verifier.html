@@ -566,29 +566,29 @@ function plainWhy(f,t,s){
   return t;
 }
 function buildParentSheet(items,title,today){
-  var css='@page{size:A4;margin:12mm}'
+  var css='@page{size:A4;margin:9mm}'
   +'*{box-sizing:border-box}body{margin:0;background:#e5e7eb;font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;color:#111;font-size:13pt}'
   +'.bar{position:sticky;top:0;z-index:5;background:#1e293b;color:#fff;padding:10px 16px;display:flex;gap:14px;align-items:center;font-size:15px}'
   +'.bar button{font-size:16px;padding:8px 18px;border:0;border-radius:8px;background:#16a34a;color:#fff;font-weight:700;cursor:pointer}'
-  +'.page{width:210mm;min-height:273mm;margin:12px auto;background:#fff;padding:12mm;page-break-after:always;break-after:page}'
-  +'.t1{font-size:12pt;color:#555}.t2{font-size:22pt;font-weight:800;margin-bottom:2mm}'
-  +'.who{border-top:3px solid #111;border-bottom:1.5px solid #888;padding:3mm 0;margin-bottom:4mm;font-size:14pt}.who b{font-size:24pt;margin:0 3mm}'
-  +'.lead{line-height:1.6;margin:0 0 5mm;font-size:12.5pt}'
-  +'.item{border:2.5px solid #dc2626;border-radius:8px;padding:4mm;margin-bottom:5mm;break-inside:avoid;page-break-inside:avoid}'
-  +'.ih{font-size:16pt;font-weight:800}.warn{color:#dc2626}'
-  +'.why{background:#fef2f2;color:#b91c1c;padding:2mm 3mm;border-radius:4px;margin:2mm 0;font-weight:700;font-size:12.5pt;line-height:1.5}'
-  +'.row{display:flex;gap:4mm;margin:2mm 0;align-items:flex-start}.k{width:27mm;flex:none;color:#555;font-weight:700;padding-top:1mm;font-size:12pt}'
-  +'.v{font-size:20pt;font-weight:800}.mono{font-family:Consolas,"Courier New",monospace;letter-spacing:.1em}.empty{color:#999;font-weight:500;font-size:14pt}'
+  +'.page{width:210mm;min-height:279mm;margin:12px auto;background:#fff;padding:9mm;page-break-after:always;break-after:page}'
+  +'.t12{display:flex;justify-content:space-between;align-items:baseline;gap:6mm}.t1{font-size:11pt;color:#555}.t2{font-size:18pt;font-weight:800;margin-bottom:.5mm}'
+  +'.who{border-top:3px solid #111;border-bottom:1.5px solid #888;padding:1.5mm 0;margin-bottom:2.5mm;font-size:12.5pt}.who b{font-size:19pt;margin:0 3mm}'
+  +'.lead{line-height:1.45;margin:0 0 3mm;font-size:11pt}'
+  +'.item{border:2.5px solid #dc2626;border-radius:8px;padding:2.5mm 4mm;margin-bottom:3mm;break-inside:avoid;page-break-inside:avoid}'
+  +'.ih{font-size:14pt;font-weight:800}.warn{color:#dc2626}.hw{font-size:10.5pt;font-weight:500;color:#555;margin-left:3mm}'
+  +'.why{background:#fef2f2;color:#b91c1c;padding:1.2mm 3mm;border-radius:4px;margin:1.5mm 0;font-weight:700;font-size:11.5pt;line-height:1.4}'
+  +'.row{display:flex;gap:4mm;margin:1.2mm 0;align-items:flex-start}.k{width:26mm;flex:none;color:#555;font-weight:700;padding-top:1mm;font-size:11pt}'
+  +'.v{font-size:18pt;font-weight:800}.mono{font-family:Consolas,"Courier New",monospace;letter-spacing:.1em}.empty{color:#999;font-weight:500;font-size:14pt}'
   +'.how{padding-top:1mm}.cb{display:inline-block;width:6.5mm;height:6.5mm;border:1.8px solid #111;vertical-align:middle;margin-right:2mm}'
-  +'.or{margin:2.5mm 0 2mm;color:#333}.ans{flex:1}'
-  +'.bx{display:inline-block;width:10.5mm;height:13mm;border:1.8px solid #111;margin-right:1.4mm;vertical-align:middle;background:#fff}.bx.en{background:#fef3c7}'
-  +'.dash{display:inline-block;width:5mm;text-align:center;font-weight:800}.cap{font-size:10.5pt;color:#555;margin-top:2mm}'
-  +'.line{display:inline-block;width:100mm;border-bottom:1.8px solid #111;height:12mm}'
-  +'.others{border:1.5px solid #888;border-radius:8px;padding:3.5mm;margin:5mm 0}.oh{font-weight:800;margin-bottom:2mm}'
-  +'.og{display:grid;grid-template-columns:1fr 1fr;gap:1.5mm 6mm;font-size:12.5pt}.og span{color:#555}.og b{font-weight:700}'
-  +'.fix{margin-top:3mm;font-size:12.5pt}.ul{display:inline-block;width:70mm;border-bottom:1.6px solid #111;height:7mm;vertical-align:bottom}'
-  +'.sign{margin-top:8mm;font-size:13pt;line-height:2.4}.sign .ul{width:55mm}'
-  +'.note{margin-top:4mm;color:#666;font-size:10pt;line-height:1.5}'
+  +'.or{margin:0 0 1.5mm;color:#333}.ans{flex:1}'
+  +'.bx{display:inline-block;width:9mm;height:10mm;border:1.8px solid #111;margin-right:1.2mm;vertical-align:middle;background:#fff}.bx.en{background:#fef3c7}'
+  +'.dash{display:inline-block;width:5mm;text-align:center;font-weight:800}.cap{font-size:9.5pt;color:#555;margin-top:1mm}'
+  +'.line{display:inline-block;width:100mm;border-bottom:1.8px solid #111;height:10mm}'
+  +'.others{border:1.5px solid #888;border-radius:8px;padding:2mm 3.5mm;margin:2mm 0;break-inside:avoid;page-break-inside:avoid}.oh{font-weight:800;margin-bottom:1mm;font-size:11pt}'
+  +'.og{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5mm 5mm;font-size:10.5pt}.og span{color:#555}.og b{font-weight:700}'
+  +'.fix{margin-top:1.5mm;font-size:11pt}.ul{display:inline-block;width:60mm;border-bottom:1.6px solid #111;height:6mm;vertical-align:bottom}'
+  +'.sign{margin-top:2mm;font-size:12pt;line-height:1.8;break-inside:avoid;page-break-inside:avoid}.sign .ul{width:55mm}'
+  +'.t4 .item{padding:1.5mm 3mm;margin-bottom:2mm}.t4 .why{margin:1mm 0;padding:.6mm 3mm}.t4 .bx{height:8.5mm;width:8mm}.t4 .v{font-size:15pt}.t4 .line{height:8mm}.t4 .lead{margin-bottom:2mm}.note{margin-top:2mm;color:#666;font-size:10pt;line-height:1.5}'
   +'@media print{body{background:#fff}.bar{display:none}.page{margin:0;width:auto;min-height:0;padding:0}.page:last-child{page-break-after:auto;break-after:auto}}';
   var pages=items.map(function(it){
     var s=it.s, byField={}, sidNote='';
@@ -600,26 +600,25 @@ function buildParentSheet(items,title,today){
     var cur={name:s.name,pid:fmtPid(s.pid),birth:birthTxt,phone:s.phone};
     var itemsHtml=['name','pid','birth','phone'].filter(function(f){return byField[f];}).map(function(f){
       var info=SHEET_FIELDS[f];
-      return '<div class="item"><div class="ih"><span class="warn">⚠ 請確認</span>　'+info.label+'</div>'
+      return '<div class="item"><div class="ih"><span class="warn">⚠ 請確認</span>　'+info.label+'<span class="hw">請對照：'+esc(info.how)+'</span></div>'
         +'<div class="why">'+byField[f].map(esc).join('；')+'</div>'
         +'<div class="row"><div class="k">學校目前登記</div><div class="v'+(f==='pid'?' mono':'')+'">'+(esc(cur[f])||'<span class="empty">（空白）</span>')+'</div></div>'
-        +'<div class="row"><div class="k">請對照</div><div class="how">'+esc(info.how)+'</div></div>'
         +'<div class="row"><div class="k">您的確認</div><div class="ans">'
-        +'<div><span class="cb"></span> 學校目前登記的是正確的</div>'
-        +'<div class="or">或　請在格子內用正楷寫下正確資料：</div>'
+        +'<div class="or"><span class="cb"></span> <b>正確</b>　　<span class="cb"></span> <b>有誤</b>，請用正楷寫下正確資料：</div>'
         +'<div>'+info.boxes()+'</div></div></div></div>';
     }).join('');
     var others=[['姓名',s.name,'name'],['性別',s.gender,'gender'],['出生年月日',birthTxt,'birth'],['身份證字號',fmtPid(s.pid),'pid'],['聯絡電話',s.phone,'phone'],['葷／素',isTrue(s.veg)?'素食':'葷食','veg']]
       .filter(function(o){return !byField[o[2]];})
       .map(function(o){return '<div><span>'+o[0]+'：</span><b>'+(esc(o[1])||'（空白）')+'</b></div>';}).join('');
-    return '<div class="page">'
-      +'<div class="t1">'+esc(title)+'</div><div class="t2">學生資料確認單</div>'
+    var nIt=Object.keys(byField).length;
+    return '<div class="page'+(nIt>=4?' t4':'')+'">'
+      +'<div class="t12"><div class="t2">學生資料確認單</div><div class="t1">'+esc(title)+'</div></div>'
       +'<div class="who">學生：<b>'+esc(s.name)+'</b>序號 '+esc(s.seq)+(s.sid?'　學號 '+esc(s.sid):'')+'</div>'
-      +'<p class="lead">親愛的家長您好：為確保孩子的資料正確，學校整理時發現下列<b>紅框項目可能有誤或尚未填寫</b>。請對照證件確認，<b>正確請打 ✓，有誤請在格子內用正楷填寫</b>，再簽名交回導師，謝謝您的協助。</p>'
+      +'<p class="lead">親愛的家長您好：為確保孩子的資料正確，學校整理時發現下列<b>紅框項目可能有誤或尚未填寫</b>。請對照證件確認，<b>正確請打 ✓，有誤請在格子內用正楷填寫</b>，再簽名，並於　　月　　日前交回導師，謝謝您的協助。</p>'
       +itemsHtml
-      +'<div class="others"><div class="oh">其他資料（供您一併核對）</div><div class="og">'+others+'</div>'
-      +'<div class="fix"><span class="cb"></span> 以上皆正確　　<span class="cb"></span> 有誤，請更正：<span class="ul"></span></div></div>'
-      +'<div class="sign">家長簽名：<span class="ul"></span>　　日期：　　　年　　　月　　　日<br>請於　　　月　　　日前交回導師。</div>'
+      +(nIt>=4?'':'<div class="others"><div class="oh">其他資料（供您一併核對）</div><div class="og">'+others+'</div>'
+      +'<div class="fix"><span class="cb"></span> 以上皆正確　　<span class="cb"></span> 有誤，請更正：<span class="ul"></span></div></div>')
+      +'<div class="sign">家長簽名：<span class="ul"></span>　　日期：　　　年　　　月　　　日</div>'
       +'<div class="note">※ 本單含孩子的個人資料，請妥善保管，勿轉交他人。'+(sidNote?'　學校備註：'+esc(sidNote)+'。':'')+'</div>'
       +'</div>';
   }).join('');
@@ -645,9 +644,12 @@ function buildFromRows(rows,fname){
   for(var r=0;r<hi && !title;r++){ for(var c=0;c<rows[r].length;c++){ if(str(rows[r][c])){title=str(rows[r][c]);break;} } }
   if(!title) title=fname.replace(/\.[^.]+$/,'');
 
-  var list=[];
+  var list=[], skipped=0;
   rows.slice(hi+1).forEach(function(row){
     var cell=function(k){return map[k]>=0 ? row[map[k]] : '';};
+    var seqv=map.seq>=0 ? str(cell('seq')) : String(list.length+1);
+    if(!/^\d+(\.0+)?$/.test(seqv)){ if(row.some(function(c){return str(c)!=='';})) skipped++; return; }
+    seqv=seqv.replace(/\.0+$/,'');
     var name=str(cell('name'));
     var pid=str(cell('pid')).toUpperCase().replace(/[^A-Z0-9]/g,'');
     if(!name && !str(cell('sid')) && !pid) return;
@@ -656,7 +658,7 @@ function buildFromRows(rows,fname){
     var g=str(cell('gender'));
     var gender = /女|^f/i.test(g) ? '女生' : /男|^m/i.test(g) ? '男生' : (pid[1]==='2' ? '女生' : '男生');
     var s={
-      seq: str(cell('seq')) || String(list.length+1),
+      seq: seqv,
       sid: str(cell('sid')), name: name, gender: gender,
       birth: normBirth(cell('birth')), pid: pid, phone: fmtPhone(phoneRaw),
       veg: str(cell('veg')), full: str(cell('full')), discount: str(cell('discount')),
@@ -673,7 +675,7 @@ function buildFromRows(rows,fname){
   var vmode='', vbest=-1;
   Object.keys(vcnt).forEach(function(k){ if(vcnt[k]>vbest || (vcnt[k]===vbest && k==='')){vmode=k;vbest=vcnt[k];} });
   list.forEach(function(s){ s.veg = vn(s.veg)!==vmode ? '✓' : ''; s.orig.veg=s.veg; });
-  return {title:title,headers:headers,list:list};
+  return {title:title,headers:headers,list:list,skipped:skipped};
 }
 
 /* ============ Vue 應用程式 ============ */
@@ -797,7 +799,9 @@ function createMyApp(){
       var today=new Date().toLocaleDateString('zh-TW');
       function printIssues(){
         if(!issueRows.value.length){ showToast('目前沒有疑問資料'); return; }
-        var items=issueRows.value.map(function(r){ return {s:r.s, issues:issueMap.value[r.i]}; });
+        var items=issueRows.value.map(function(r){ return {s:r.s, issues:issueMap.value[r.i]}; })
+          .filter(function(it){ return it.issues.some(function(x){return x.f!=='sid';}); });
+        if(!items.length){ showToast('沒有需要請家長確認的項目（只有學號重複，請由老師處理）'); return; }
         var html=buildParentSheet(items,title.value,today);
         var blob=new Blob([html],{type:'text/html;charset=utf-8'}), url=URL.createObjectURL(blob), w=null;
         try{ w=window.open(url,'_blank'); }catch(e){}
@@ -941,7 +945,7 @@ function createMyApp(){
       function applyBuilt(b,fname){
         students.value=b.list; title.value=b.title; headers.value=b.headers; fileName.value=fname;
         idx.value=0; loadError.value=''; showDone.value=false; tab.value='card'; filter.value='all';
-        showToast('已載入 '+b.list.length+' 位學生');
+        showToast('已載入 '+b.list.length+' 位學生'+(b.skipped?'（略過 '+b.skipped+' 列序號不是數字的資料）':''));
       }
       async function readFile(file){
         loadError.value='';
@@ -1008,6 +1012,23 @@ function createMyApp(){
               if(k && isModS(s,k)) cell.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FFFFFF99'}};
             }
           });
+          var r0=3+students.value.length+1;
+          [['學生',students.value.length],['老師',1],['家長',0]].forEach(function(x,k){
+            var rw=ws.getRow(r0+k);
+            rw.getCell(1).value=x[0]; rw.getCell(2).value=x[1]; rw.getCell(3).value='人';
+          });
+          var tr=ws.getRow(r0+4);
+          tr.getCell(1).value='總共';
+          tr.getCell(2).value={formula:'SUM(B'+r0+':B'+(r0+2)+')',result:students.value.length+1};
+          tr.getCell(3).value='人';
+          for(var rr=r0;rr<=r0+4;rr++){
+            if(rr===r0+3) continue;
+            for(var cc=1;cc<=3;cc++){
+              var sc=ws.getRow(rr).getCell(cc);
+              sc.font={bold:true,size:12}; sc.alignment={horizontal:'center',vertical:'middle'};
+              if(rr===r0+4) sc.border={top:{style:'thin'}};
+            }
+          }
           [8,10,12,8,16,16,16,12,14,16,14].forEach(function(w,i){ ws.getColumn(i+1).width=w; });
           var buf=await wb.xlsx.writeBuffer();
           var blob=new Blob([buf],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
