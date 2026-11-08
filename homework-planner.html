@@ -1,0 +1,1372 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>國小教學作業排程與上學日估算器</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Iansui&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&display=swap">
+<style>
+/* 版面概念：米白底上飄著柔霧漸層，六個黏土質感的馬卡龍色塊。頂部珍珠色結果帶（小雞＋三個大數字），下方左邊填寫、右邊對帳與日曆；手機改單欄，捲動時底部浮出迷你摘要。 */
+:root{
+  --bg:#FAF7F2;--surface:#FFFDFA;--field:#F4ECE5;--ink:#43344A;--muted:#7B6C82;--line:#EFE3DC;--shadow:#E8DAD1;--hi:rgba(255,255,255,.7);--lo:rgba(110,70,90,.13);--press:rgba(100,60,90,.16);--m1:rgba(255,183,178,.45);--m2:rgba(181,234,215,.5);--m3:rgba(199,206,234,.55);--m4:rgba(255,229,180,.6);--pearl:#FFF6EA;--pearl2:#FFFEFB;--d-sch:#C9F0E0;--d-sch-i:#17614A;--d-hol:#FFAE8C;--d-hol-i:#7A2E10;--d-eve:#FFE066;--d-eve-i:#6B4700;--d-exam:#E1D5FA;--d-exam-i:#4B2C8F;--d-mon:#8FCBF0;--d-mon-i:#14507C;--d-typ:#7ED6D6;--d-typ-i:#0E5252;--d-trip:#CDE86B;--d-trip-i:#3F5200;--d-sport:#F7A8D8;--d-sport-i:#7A1F57;--d-mh:#FF9494;--d-mh-i:#7A1A1A;--xl-a:#E3F3FC;--xl-head:#BFE0F3;--xl-line:#CFE5F2;--xl-tot:#E4DAF8;--xl-tot-i:#3A2477;--d-c0:#C3C6FF;--d-c0-i:#2A2F8F;--d-c1:#EFD9AE;--d-c1-i:#6B4A12;--d-c2:#DAD2E6;--d-c2-i:#4A3F5C;--d-c3:#B9EBB0;--d-c3-i:#1F5A18;--rose:#FFB7B2;--rose2:#FFD7D3;--rose-sh:rgba(235,135,128,.38);--rose-ink:#8A2B33;--peach:#FFDAC1;--peach2:#FFEBDD;--peach-sh:rgba(240,165,115,.36);--peach-ink:#8A4220;--butter:#FFE5B4;--butter2:#FFF3DA;--butter-sh:rgba(232,185,95,.4);--butter-ink:#7A5200;--mint:#B5EAD7;--mint2:#D7F6EA;--mint-sh:rgba(105,200,165,.38);--mint-ink:#1F6A4F;--sky:#BEE5F6;--sky2:#E0F4FC;--sky-sh:rgba(100,170,225,.4);--sky-ink:#1B5E8F;--lav:#E3D6F5;--lav2:#F2EBFC;--lav-sh:rgba(175,145,222,.4);--lav-ink:#5A3F99;
+  --f-display:"Iansui","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;--f-body:"Iansui","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;--f-num:"Fredoka","Iansui","Noto Sans TC",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1E1A24;--surface:#2B2533;--field:#241F2C;--ink:#F2EAF5;--muted:#B8ABC0;--line:#3C3347;--shadow:#15111B;--hi:rgba(255,255,255,.10);--lo:rgba(0,0,0,.32);--press:rgba(0,0,0,.45);--m1:rgba(255,183,178,.22);--m2:rgba(181,234,215,.16);--m3:rgba(199,206,234,.24);--m4:rgba(255,229,180,.15);color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1E1A24;--surface:#2B2533;--field:#241F2C;--ink:#F2EAF5;--muted:#B8ABC0;--line:#3C3347;--shadow:#15111B;--hi:rgba(255,255,255,.10);--lo:rgba(0,0,0,.32);--press:rgba(0,0,0,.45);--m1:rgba(255,183,178,.22);--m2:rgba(181,234,215,.16);--m3:rgba(199,206,234,.24);--m4:rgba(255,229,180,.15);color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background-color:var(--bg);background-image:radial-gradient(520px 420px at 6% 3%,var(--m1),transparent 70%),radial-gradient(560px 460px at 97% 10%,var(--m3),transparent 70%),radial-gradient(600px 480px at 92% 76%,var(--m2),transparent 70%),radial-gradient(560px 460px at 3% 94%,var(--m4),transparent 70%);background-repeat:no-repeat;background-attachment:fixed;color:var(--ink);font:400 18px/1.65 var(--f-body);
+  padding-block:18px 40px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1120px;margin:0 auto;display:grid;gap:16px}
+h1,h2,h3,p,ul,ol{margin:0}
+h1{font:400 clamp(21px,4.6vw,29px)/1.25 var(--f-display);text-wrap:balance}
+h2{font:400 17px/1.3 var(--f-display)}
+h3{font:700 14px/1.4 var(--f-body);color:var(--muted)}
+button,input{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--sky-ink);outline-offset:2px}
+
+/* 頂部 */
+.top{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between}
+.brand{display:grid;gap:2px;min-width:0}
+.sub{color:var(--muted);font-size:14px}
+.tabs{display:inline-flex;background:var(--field);border:2px solid var(--line);border-radius:999px;padding:4px;gap:4px}
+.tabs button{border:0;background:transparent;font:400 17px/1 var(--f-display);padding:10px 24px;border-radius:999px;color:var(--muted);cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--butter);color:var(--butter-ink);box-shadow:0 2px 0 var(--shadow)}
+.notice{background:var(--butter);color:var(--butter-ink);border-radius:14px;padding:10px 16px;font-weight:500}
+
+/* 卡片 */
+.card{background:var(--surface);border:2px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 4px 0 var(--shadow);display:grid;gap:14px;min-width:0}
+.tag{display:inline-block;border-radius:999px;padding:3px 14px;font:400 16px/1.4 var(--f-display)}
+.t-sky{background:var(--sky);color:var(--sky-ink)}
+.t-mint{background:var(--mint);color:var(--mint-ink)}
+.t-butter{background:var(--butter);color:var(--butter-ink)}
+.t-peach{background:var(--peach);color:var(--peach-ink)}
+.t-rose{background:var(--rose);color:var(--rose-ink)}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.08fr);gap:16px;align-items:start}
+.col{display:grid;gap:16px;min-width:0}
+
+/* 結果帶 */
+.hero{gap:16px}
+.hero-top{display:flex;flex-wrap:wrap;gap:14px 18px;align-items:center}
+.mascot{width:100px;height:auto;flex:none;--mline:#5B4630;--mc:#FFD65C;--mc2:#F7BC38;--mbelly:#FFF2C6;--mbeak:#FF9B4A;--mblush:#FF9DB0;--mwhite:#FFFFFF}
+.mascot .o{stroke:var(--mline);stroke-width:3;stroke-linejoin:round;stroke-linecap:round}
+.mascot .body{fill:var(--mc)}
+.mascot .belly{fill:var(--mbelly)}
+.mascot .wing{fill:var(--mc2)}
+.mascot .beak{fill:var(--mbeak);stroke-width:2.5}
+.mascot .foot{fill:var(--mbeak)}
+.mascot .blush{fill:var(--mblush);opacity:.85}
+.mascot .tongue{fill:var(--mblush)}
+.mascot .dot{fill:var(--mline)}
+.mascot .hi{fill:var(--mwhite)}
+.mascot .line{fill:none;stroke:var(--mline);stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round}
+.mascot .drop{fill:var(--sky);stroke:var(--mline);stroke-width:2}
+.mascot [class^="g-"]{display:none}
+.mascot[data-mood="good"] .g-good,.mascot[data-mood="ok"] .g-ok,.mascot[data-mood="bad"] .g-bad{display:inline}
+.bubble{flex:1 1 240px;min-width:0;display:grid;gap:2px}
+.exam-name{font:400 22px/1.3 var(--f-display)}
+.range-line{color:var(--muted);font-size:14px}
+.say{font-weight:500}
+.hero-actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.stat{--sb:var(--field);--si:var(--ink);background:var(--sb);border-radius:18px;padding:16px;display:grid;gap:8px;align-content:start;min-width:0}
+.stat.avail{--sb:var(--sky);--si:var(--sky-ink)}
+.stat.good{--sb:var(--mint);--si:var(--mint-ink)}
+.stat.ok{--sb:var(--butter);--si:var(--butter-ink)}
+.stat.bad{--sb:var(--rose);--si:var(--rose-ink)}
+.stat h2{font-size:15px;color:var(--si)}
+.big{font:600 clamp(44px,8vw,60px)/1 var(--f-num);color:var(--si);font-variant-numeric:tabular-nums;display:flex;align-items:baseline;gap:6px}
+.big small{font:400 16px var(--f-display)}
+.meta{font-size:13px;color:var(--ink);opacity:.82}
+.bar{height:10px;border-radius:99px;background:var(--surface);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:inherit;background:var(--si);width:0}
+.pill{justify-self:start;background:var(--surface);color:var(--si);border-radius:999px;padding:2px 12px;font-weight:700;font-size:14px}
+.sumbox{width:100%;min-height:150px;border:2px solid var(--line);border-radius:12px;background:var(--field);padding:10px;font:14px/1.6 var(--f-body)}
+.toast{font-size:13px;color:var(--mint-ink);font-weight:700;min-height:1.2em}
+
+/* 表單 */
+.fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:12px}
+.field{display:grid;gap:4px;align-content:start;min-width:0}
+.field label,.lbl{font-size:13px;font-weight:700;color:var(--muted)}
+input[type="date"],input[type="number"],input[type="text"]{width:100%;min-width:0;border:2px solid var(--line);border-radius:12px;background:var(--field);padding:8px 10px;font-variant-numeric:tabular-nums}
+input:disabled{opacity:.65;cursor:not-allowed}
+.hint{font-size:12.5px;color:var(--peach-ink);min-height:1em}
+.check{display:flex;gap:8px;align-items:center;cursor:pointer;font-weight:500}
+input[type="checkbox"]{width:20px;height:20px;accent-color:var(--mint-ink);flex:none}
+.facts{list-style:none;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--field);border:1.5px solid var(--line);border-radius:999px;padding:3px 12px;font-size:13px}
+.chip.nohw{background:var(--butter);border-color:transparent;color:var(--butter-ink)}
+.chip.warn{background:var(--rose);border-color:transparent;color:var(--rose-ink);font-weight:700}
+.formula{font-size:13.5px;background:var(--field);border-radius:12px;padding:8px 12px;color:var(--ink)}
+.formula b{font-family:var(--f-num);font-variant-numeric:tabular-nums}
+.note{font-size:12.5px;color:var(--muted)}
+
+/* 對帳 */
+.ledger{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.ledger td{padding:6px 2px;border-bottom:1.5px dashed var(--line)}
+.ledger td:last-child{text-align:right;font:600 17px var(--f-num);white-space:nowrap}
+.ledger tr.total td{border-bottom:0;border-top:2px solid var(--ink);padding-top:10px;font-weight:700}
+.ledger tr.total td:last-child{font-size:24px;color:var(--sky-ink)}
+.hol,.adj{list-style:none;padding:0;display:grid;gap:8px}
+.hol li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 10px;align-items:center;background:var(--field);border-radius:14px;padding:8px 12px}
+.hol label{display:flex;gap:10px;align-items:center;cursor:pointer;font-weight:700;min-width:0}
+.hol .hw{grid-column:1;font-size:13px;color:var(--muted);padding-left:30px}
+.hol .hb{grid-column:2;grid-row:1 / span 2;align-self:center;background:var(--peach);color:var(--peach-ink);border-radius:999px;padding:2px 12px;font-size:13px;font-weight:700;white-space:nowrap}
+.hol li.off .hb{background:var(--mint);color:var(--mint-ink)}
+.hol li.off label span{opacity:.7}
+.empty{color:var(--muted);font-size:14px;padding:6px 2px}
+.quick{display:flex;flex-wrap:wrap;gap:8px}
+.btn{font:400 15px/1.2 var(--f-display);border:2px solid var(--line);border-radius:999px;padding:8px 16px;background:var(--surface);color:var(--ink);cursor:pointer;box-shadow:0 2px 0 var(--shadow)}
+.btn:active{transform:translateY(2px);box-shadow:none}
+.btn.minus{background:var(--peach);color:var(--peach-ink);border-color:transparent}
+.btn.plus{background:var(--mint);color:var(--mint-ink);border-color:transparent}
+.btn.ghost{background:var(--field)}
+.btn.sm{padding:4px 12px;font-size:14px}
+.adj li{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 10px;align-items:center;background:var(--field);border-radius:14px;padding:8px 12px}
+.adj .an{font-weight:700;overflow-wrap:anywhere}
+.adj .av{font:600 16px var(--f-num);font-variant-numeric:tabular-nums}
+.adj .ac{display:flex;gap:6px;flex-wrap:wrap}
+.custom{display:grid;grid-template-columns:minmax(0,1fr) 92px auto;gap:8px;align-items:end}
+
+/* 日曆 */
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.sw{width:16px;height:16px;border-radius:5px;display:inline-block}
+.cal{display:grid;grid-template-columns:repeat(auto-fill,minmax(236px,1fr));gap:16px}
+.mo{display:grid;gap:6px;min-width:0}
+.mo h3{color:var(--ink);font-family:var(--f-display);font-weight:400;font-size:15px}
+.mg{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.wh{font-size:11px;text-align:center;color:var(--muted)}
+.d{aspect-ratio:1;border-radius:8px;font-size:12px;line-height:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-variant-numeric:tabular-nums}
+.d::after{content:attr(data-t);font-size:9px;font-weight:700;min-height:9px}
+.d.sch{background:var(--mint);color:var(--mint-ink)}
+.d.hol{background:var(--peach);color:var(--peach-ink)}
+.d.eve{background:var(--butter);color:var(--butter-ink)}
+.d.exam{background:var(--rose);color:var(--rose-ink)}
+.d.reh{background:var(--mint);color:var(--mint-ink);outline:2px dashed var(--peach-ink);outline-offset:-3px}
+.d.wk{color:var(--muted)}
+.d.out{color:var(--muted);opacity:.4}
+.d.today{box-shadow:0 0 0 2px var(--ink)}
+.fields.c2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.fields.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
+button.d{border:0;padding:0;font-family:inherit;cursor:pointer;background:transparent}
+button.d:hover{outline:2px solid var(--ink);outline-offset:-2px}
+.d.moff{background:repeating-linear-gradient(45deg,var(--peach),var(--peach) 4px,var(--surface) 4px,var(--surface) 8px);color:var(--peach-ink)}
+.d.mon{background:var(--sky);color:var(--sky-ink)}
+.foot{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;justify-content:space-between;color:var(--muted);font-size:12.5px}
+.foot p{flex:1 1 360px}
+
+/* 手機底部迷你摘要 */
+.mini{display:none;position:fixed;left:0;right:0;bottom:0;z-index:5;gap:8px;justify-content:center;flex-wrap:wrap;
+  background:var(--surface);border-top:2px solid var(--line);
+  padding:8px max(16px,env(safe-area-inset-right,0px)) calc(8px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.mini span{background:var(--field);border-radius:999px;padding:3px 12px;font-weight:700;font-size:14px;white-space:nowrap}
+.mini span.good{background:var(--mint);color:var(--mint-ink)}
+.mini span.ok{background:var(--butter);color:var(--butter-ink)}
+.mini span.bad{background:var(--rose);color:var(--rose-ink)}
+.po{display:none}
+
+@media (max-width:900px){.cols{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:760px){
+  .stats{grid-template-columns:minmax(0,1fr)}
+  .stat{grid-template-columns:auto minmax(0,1fr);column-gap:16px;align-items:center}
+  .stat h2,.stat .meta,.stat .pill{grid-column:1 / -1}
+  .mini.show{display:flex}
+  body{padding-bottom:84px}
+  .custom{grid-template-columns:minmax(0,1fr) 84px}
+  .custom .btn{grid-column:1 / -1}
+}
+@media (prefers-reduced-motion:no-preference){
+  .btn{transition:transform .08s,box-shadow .08s}
+  .bar i{transition:width .35s ease}
+}
+
+/* 深色模式也維持馬卡龍：這幾個元件固定用淺色系，只有頁面底色變深 */
+.card,.notice,.mini,.tabs{--surface:#FFFDFA;--field:#F4ECE5;--ink:#43344A;--muted:#7B6C82;--line:#EFE3DC;--shadow:#E8DAD1;--hi:rgba(255,255,255,.7);--lo:rgba(110,70,90,.13);--press:rgba(100,60,90,.16);color:var(--ink);color-scheme:light}
+
+/* 黏土質感馬卡龍：色塊像捏出來的軟糖，外有彩色柔影，內有高光與暗部 */
+.card{--c:var(--pearl);--c2:var(--pearl2);--sh:var(--lo);--ci:var(--ink);
+  background:linear-gradient(145deg,var(--c2),var(--c));border:0;border-radius:24px;padding:22px;
+  box-shadow:inset 5px 6px 10px var(--hi),inset -6px -8px 14px var(--lo),0 14px 26px var(--sh)}
+.card.pk{--c:var(--rose);--c2:var(--rose2);--sh:var(--rose-sh);--ci:var(--rose-ink)}
+.card.pe{--c:var(--peach);--c2:var(--peach2);--sh:var(--peach-sh);--ci:var(--peach-ink)}
+.card.le{--c:var(--butter);--c2:var(--butter2);--sh:var(--butter-sh);--ci:var(--butter-ink)}
+.card.pi{--c:var(--mint);--c2:var(--mint2);--sh:var(--mint-sh);--ci:var(--mint-ink)}
+.card.bl{--c:var(--sky);--c2:var(--sky2);--sh:var(--sky-sh);--ci:var(--sky-ink)}
+.card.la{--c:var(--lav);--c2:var(--lav2);--sh:var(--lav-sh);--ci:var(--lav-ink)}
+.card.hero{--c:var(--pearl);--c2:var(--pearl2);--sh:var(--butter-sh);--ci:var(--butter-ink)}
+.card .tag{background:var(--surface);color:var(--ci);font-size:18px;padding:5px 20px;border-radius:999px;transform:rotate(-2deg);
+  box-shadow:inset 0 2px 2px var(--hi),inset 0 -3px 5px var(--lo),0 5px 10px var(--lo)}
+.card h3,.card .field label,.card .mo h3,.card .legend,.card .empty{color:var(--ci)}
+.card .note{color:var(--ci);opacity:.85}
+.card .hint{color:var(--rose-ink)}
+.card input[type="date"],.card input[type="number"],.card input[type="text"]{background:var(--surface);border:0;border-radius:16px;padding:10px 12px;
+  box-shadow:inset 2px 3px 7px var(--press),0 1px 0 var(--hi)}
+.card input:focus{outline:none;box-shadow:inset 2px 3px 7px var(--press),0 0 0 3px var(--surface),0 0 0 5px var(--ci)}
+.card input[type="checkbox"]{accent-color:var(--ci)}
+.card .formula,.card .hol li,.card .adj li{background:var(--surface);border-radius:18px;box-shadow:0 3px 8px var(--lo),inset 0 2px 2px var(--hi)}
+.card .chip{background:var(--surface);border:0;box-shadow:0 3px 8px var(--lo),inset 0 2px 2px var(--hi)}
+.card .chip.nohw{background:var(--butter);color:var(--butter-ink)}
+.card .chip.warn{background:var(--rose);color:var(--rose-ink)}
+.card .sumbox{background:var(--surface);border:0;border-radius:16px;box-shadow:inset 2px 3px 7px var(--press)}
+.card .ledger td{border-bottom:1.5px dashed var(--lo)}
+.card .ledger tr.total td{border-top:2px solid var(--ci);border-bottom:0}
+.card .ledger tr.total td:last-child{color:var(--ci)}
+.hol .hb{background:var(--rose);color:var(--rose-ink)}
+.hol li.off .hb{background:var(--mint);color:var(--mint-ink)}
+
+.btn{background:linear-gradient(145deg,var(--surface),var(--field));color:var(--ink);border:0;border-radius:999px;padding:9px 18px;
+  box-shadow:inset 0 2px 2px var(--hi),inset 0 -3px 6px var(--lo),0 5px 10px var(--lo)}
+.btn:active{box-shadow:inset 2px 3px 6px var(--press);transform:translateY(1px)}
+.btn.minus{background:linear-gradient(145deg,var(--rose2),var(--rose));color:var(--rose-ink)}
+.btn.plus{background:linear-gradient(145deg,var(--mint2),var(--mint));color:var(--mint-ink)}
+.btn.ghost{background:linear-gradient(145deg,var(--surface),var(--field))}
+.btn.sm{padding:5px 14px}
+
+.tabs{background:var(--field);border:0;padding:5px;box-shadow:inset 2px 3px 8px var(--press)}
+.tabs button[data-tab="mid"][aria-selected="true"]{background:linear-gradient(145deg,var(--rose2),var(--rose));color:var(--rose-ink);box-shadow:inset 0 2px 2px var(--hi),0 4px 8px var(--rose-sh)}
+.tabs button[data-tab="fin"][aria-selected="true"]{background:linear-gradient(145deg,var(--sky2),var(--sky));color:var(--sky-ink);box-shadow:inset 0 2px 2px var(--hi),0 4px 8px var(--sky-sh)}
+.notice{background:linear-gradient(145deg,var(--butter2),var(--butter));color:var(--butter-ink);border-radius:999px;padding:10px 22px;
+  box-shadow:inset 0 2px 2px var(--hi),inset 0 -3px 6px var(--lo),0 8px 16px var(--butter-sh)}
+.dots{display:flex;gap:6px;margin-top:6px}
+.dots i{display:block;width:13px;height:13px;border-radius:50%;box-shadow:inset 1px 2px 2px var(--hi),inset -1px -2px 3px var(--lo),0 2px 4px var(--lo)}
+.dots i:nth-child(1){background:var(--rose)}.dots i:nth-child(2){background:var(--peach)}.dots i:nth-child(3){background:var(--butter)}
+.dots i:nth-child(4){background:var(--mint)}.dots i:nth-child(5){background:var(--sky)}.dots i:nth-child(6){background:var(--lav)}
+
+.stat{--sb:var(--field);--sb2:var(--surface);--ssh:var(--lo);background:linear-gradient(145deg,var(--sb2),var(--sb));border-radius:22px;padding:18px;
+  box-shadow:inset 4px 5px 9px var(--hi),inset -5px -7px 12px var(--lo),0 10px 18px var(--ssh)}
+.stat.avail{--sb:var(--lav);--sb2:var(--lav2);--ssh:var(--lav-sh);--si:var(--lav-ink)}
+.stat.good{--sb:var(--mint);--sb2:var(--mint2);--ssh:var(--mint-sh);--si:var(--mint-ink)}
+.stat.ok{--sb:var(--butter);--sb2:var(--butter2);--ssh:var(--butter-sh);--si:var(--butter-ink)}
+.stat.bad{--sb:var(--rose);--sb2:var(--rose2);--ssh:var(--rose-sh);--si:var(--rose-ink)}
+.stat .pill{background:var(--surface);box-shadow:0 3px 6px var(--lo),inset 0 2px 2px var(--hi)}
+
+.d{border-radius:10px}
+.d.sch,.d.hol,.d.eve,.d.exam,.d.reh,.d.moff,.d.mon{box-shadow:inset 1px 2px 3px var(--hi),inset -1px -2px 4px var(--lo)}
+.d.today{box-shadow:0 0 0 2px var(--ink)}
+.card .wh{color:var(--ci)}
+.card .d.wk,.card .d.out{color:var(--ci)}
+.mini{background:var(--surface);border:0;border-radius:24px 24px 0 0;box-shadow:0 -8px 20px var(--lo)}
+.mini span{background:var(--field);box-shadow:inset 0 2px 2px var(--hi),inset 0 -2px 4px var(--lo)}
+.mini span.good{background:var(--mint);color:var(--mint-ink)}
+.mini span.ok{background:var(--butter);color:var(--butter-ink)}
+.mini span.bad{background:var(--rose);color:var(--rose-ink)}
+.fields.c2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.fields.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
+
+/* 日曆：每個月放在奶油色底板上，各類日子用差異大的顏色 */
+.mo{background:var(--surface);border-radius:18px;padding:12px;box-shadow:0 4px 10px var(--lo),inset 0 2px 2px var(--hi)}
+.cal{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.d.sch,.sw.sch{background:var(--d-sch);color:var(--d-sch-i)}
+.d.hol,.sw.hol{background:var(--d-hol);color:var(--d-hol-i)}
+.d.eve,.sw.eve{background:var(--d-eve);color:var(--d-eve-i)}
+.d.exam,.sw.exam{background:var(--d-exam);color:var(--d-exam-i)}
+.d.mon,.sw.mon{background:var(--d-mon);color:var(--d-mon-i)}
+.d.reh,.sw.reh{background:var(--d-sch);color:var(--d-sch-i);outline:2.5px dashed var(--d-hol-i);outline-offset:-3px}
+.d.moff,.sw.moff{background:repeating-linear-gradient(45deg,var(--d-hol),var(--d-hol) 4px,var(--surface) 4px,var(--surface) 8px);color:var(--d-hol-i)}
+.d.hol,.d.eve,.d.exam,.d.mon,.d.moff,.d.reh{font-weight:700}
+.sw{width:18px;height:18px;border-radius:6px;box-shadow:inset 1px 2px 3px var(--hi),inset -1px -2px 4px var(--lo)}
+
+/* 小雞與彩帶 */
+.mwrap{position:relative;flex:none;width:100px}
+.mwrap .mascot{display:block;filter:drop-shadow(0 8px 5px var(--lo))}
+.mascot .hl{fill:#fff;opacity:.5}
+.spark{position:absolute;color:var(--butter-ink);opacity:0;pointer-events:none;font-size:16px;line-height:1}
+.spark.s1{left:-8px;top:8px}.spark.s2{right:-6px;top:-4px;font-size:21px}.spark.s3{right:4px;bottom:20px;font-size:13px}
+.mascot[data-mood="good"] ~ .spark{opacity:1}
+.cf{position:absolute;left:50%;top:50%;width:9px;height:9px;border-radius:3px;pointer-events:none;opacity:0}
+
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes shake{0%,100%{transform:rotate(0)}30%{transform:rotate(-2.5deg)}70%{transform:rotate(2.5deg)}}
+@keyframes hop{0%{transform:translateY(0) scale(1,1)}30%{transform:translateY(-18px) scale(.95,1.06)}62%{transform:translateY(0) scale(1.07,.93)}100%{transform:none}}
+@keyframes twinkle{0%,100%{transform:scale(.7) rotate(0);opacity:.35}50%{transform:scale(1.2) rotate(18deg);opacity:1}}
+@keyframes burst{0%{opacity:1;transform:translate(-50%,-50%) scale(.5) rotate(0)}100%{opacity:0;transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy))) scale(1) rotate(240deg)}}
+@keyframes pop{0%{transform:scale(.95)}60%{transform:scale(1.04)}100%{transform:scale(1)}}
+@keyframes rise{0%{opacity:.2;transform:translateY(12px)}100%{opacity:1;transform:none}}
+@media (prefers-reduced-motion:no-preference){
+  .mascot{transform-origin:50% 100%}
+  .mascot[data-mood="good"]{animation:bob 2.4s ease-in-out infinite}
+  .mascot[data-mood="ok"]{animation:bob 4.2s ease-in-out infinite}
+  .mascot[data-mood="bad"]{animation:shake 1.4s ease-in-out infinite}
+  .mascot.hop{animation:hop .7s ease-out}
+  .spark{animation:twinkle 1.8s ease-in-out infinite}
+  .spark.s2{animation-delay:.6s}.spark.s3{animation-delay:1.1s}
+  .cf{animation:burst .85s ease-out forwards}
+  .stat.pop{animation:pop .45s ease-out}
+  .swap .card{animation:rise .4s ease-out both}
+  .swap .card:nth-child(2){animation-delay:.05s}
+  .btn:hover{transform:translateY(-2px) rotate(-1deg)}
+  .btn:active{transform:translateY(1px)}
+  .stat{transition:transform .15s}
+  .stat:hover{transform:translateY(-3px)}
+  .d.sch,.d.hol,.d.moff,.d.mon,.d.reh,.d.wk{transition:transform .1s}
+  button.d:hover{transform:scale(1.12)}
+}
+
+/* 字級：操作與結果的字放大，說明文字維持較小 */
+h1{font-size:clamp(26px,5.4vw,38px)}
+h2{font-size:21px}
+h3{font-size:17px}
+.sub{font-size:15px}
+.tabs button{font-size:20px;padding:12px 28px}
+.notice{font-size:18px}
+.card .tag{font-size:22px;padding:6px 22px}
+.exam-name{font-size:30px}
+.range-line{font-size:16px}
+.say{font-size:20px;line-height:1.5}
+.stat h2{font-size:19px}
+.big{font-size:clamp(56px,9vw,76px)}
+.big small{font-size:22px}
+.meta{font-size:15px}
+.pill{font-size:17px}
+.toast{font-size:15px}
+.field label,.lbl{font-size:16px}
+input[type="date"],input[type="number"],input[type="text"]{font-size:19px}
+input[type="checkbox"]{width:24px;height:24px}
+.check{font-size:18px}
+.hint{font-size:14px}
+.chip{font-size:15px}
+.formula{font-size:16px}
+.note{font-size:14px}
+.ledger td{font-size:18px}
+.ledger td:last-child{font-size:21px}
+.ledger tr.total td:last-child{font-size:30px}
+.hol label{font-size:19px}
+.hol .hw{font-size:14px;padding-left:34px}
+.hol .hb{font-size:15px}
+.btn{font-size:18px}
+.btn.sm{font-size:16px}
+.adj .an,.adj .av{font-size:18px}
+.legend{font-size:15px}
+.mo h3{font-size:19px}
+.wh{font-size:14px}
+.d{font-size:16px;font-family:var(--f-num)}
+.d::after{font-size:11px;min-height:11px;font-family:var(--f-body)}
+.cal{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.mo{padding:10px;align-content:start}
+.mg{gap:2px}
+.d{gap:0}
+.mini span{font-size:17px}
+.sumbox{font-size:16px}
+.foot{font-size:14px}
+.custom{grid-template-columns:minmax(0,1fr) 110px auto}
+@media (max-width:760px){
+  .custom{grid-template-columns:minmax(0,1fr) 100px}
+  body{padding-bottom:104px}
+}
+@media (max-width:560px){
+  .cal{grid-template-columns:minmax(0,1fr)}
+}
+@media (max-width:480px){
+  .fields.c3{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .fields.c3 .field:last-child{grid-column:1 / -1}
+}
+
+/* 桌機專用：字再放大，輸入框的字最大；日曆佔滿整個畫面寬度，四個月排成 2×2 */
+.wrap{max-width:1400px}
+body{font-size:20px}
+h1{font-size:clamp(30px,3.6vw,42px)}
+h2{font-size:23px}
+h3{font-size:19px}
+.sub{font-size:17px}
+.tabs button{font-size:23px;padding:14px 32px}
+.notice{font-size:20px}
+.card .tag{font-size:25px;padding:7px 24px}
+.exam-name{font-size:34px}
+.range-line{font-size:17px}
+.say{font-size:23px}
+.stat h2{font-size:21px}
+.big{font-size:clamp(64px,7vw,88px)}
+.big small{font-size:25px}
+.meta{font-size:16px}
+.pill{font-size:19px}
+.toast{font-size:16px}
+.field label,.lbl{font-size:19px}
+.card input[type="number"]{font-size:30px;font-family:var(--f-num);font-weight:500;padding:10px 14px}
+.card input[type="date"]{font-size:23px;font-family:var(--f-num);font-weight:500;padding:12px 12px}
+.card input[type="text"]{font-size:24px;padding:12px 14px}
+input[type="checkbox"]{width:28px;height:28px}
+.check{font-size:20px}
+.hint{font-size:15px}
+.chip{font-size:16px}
+.formula{font-size:18px}
+.note{font-size:15px}
+.fields{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+.ledger td{font-size:20px}
+.ledger td:last-child{font-size:24px}
+.ledger tr.total td:last-child{font-size:34px}
+.hol label{font-size:21px}
+.hol .hw{font-size:15px;padding-left:38px}
+.hol .hb{font-size:16px}
+.btn{font-size:20px;padding:10px 20px}
+.btn.sm{font-size:17px}
+.adj .an,.adj .av{font-size:20px}
+.custom{grid-template-columns:minmax(0,1fr) 120px auto}
+.legend{font-size:17px}
+.sw{width:20px;height:20px}
+.cal{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.mo{padding:16px}
+.mo h3{font-size:24px}
+.mg{gap:5px}
+.wh{font-size:17px}
+.d{aspect-ratio:auto;min-height:58px;font-size:23px;border-radius:12px}
+.d::after{font-size:14px;min-height:14px}
+.foot{font-size:15px}
+.sumbox{font-size:18px}
+.mini span{font-size:18px}
+
+/* 版面：結果列在最上方，要填的欄位 2×2 排在下面，沒有任何區塊固定 */
+.wrap{display:flex;flex-direction:column;gap:16px}
+.hero{position:relative;display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:16px 20px;align-items:center;padding:14px 20px}
+.hero-top{flex-wrap:nowrap;gap:14px}
+.hero .mwrap,.hero .mascot{width:76px}
+.hero .bubble{flex:1 1 0;min-width:0}
+.exam-name{font-size:24px;line-height:1.3}
+.range-line{display:none}
+.say{font-size:19px;line-height:1.45}
+.hero .stats{gap:12px}
+.hero .stat{grid-template-columns:auto minmax(0,1fr);grid-template-areas:"title title" "num pill";column-gap:12px;row-gap:0;padding:10px 16px;align-items:center}
+.hero .stat h2{grid-area:title;font-size:18px}
+.hero .stat .big{grid-area:num;font-size:clamp(46px,4.4vw,60px)}
+.hero .stat .pill{grid-area:pill;justify-self:start;font-size:17px;padding:2px 14px}
+.hero .stat .meta{display:none}
+.grid22{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:stretch}
+.grid22 .card{align-content:start}
+.ledgercols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+.holbox{display:grid;gap:12px;align-content:start}
+.grid22 .card.pi .fields{grid-template-columns:minmax(0,1fr)}
+.quick{gap:8px}
+.quick .btn{font-size:18px;padding:9px 14px}
+.custom{grid-template-columns:minmax(0,1fr) 160px auto}
+
+/* 扣除明細：一列一個顏色，顏色和日曆圖例一致 */
+.ledger{display:grid;gap:10px;align-content:start}
+.lrow{display:flex;justify-content:space-between;align-items:center;gap:12px;border:3px solid var(--surface);border-radius:999px;padding:10px 22px;font-size:20px;
+  box-shadow:inset 0 2px 2px var(--hi),inset 0 -3px 6px var(--lo),0 5px 10px var(--lo)}
+.lrow b{font:600 25px var(--f-num);white-space:nowrap}
+.lrow.r-sch{background:var(--d-sch);color:var(--d-sch-i)}
+.lrow.r-hol{background:var(--d-hol);color:var(--d-hol-i)}
+.lrow.r-eve{background:var(--d-eve);color:var(--d-eve-i)}
+.lrow.r-man{background:var(--d-mon);color:var(--d-mon-i)}
+.lrow.r-adj{background:var(--rose);color:var(--rose-ink)}
+.lrow.r-tot{background:linear-gradient(145deg,var(--lav2),var(--lav));color:var(--lav-ink);margin-top:6px;padding:12px 24px;font-size:24px}
+.lrow.r-tot b{font-size:36px}
+.lrow.zero{opacity:.55}
+@media (max-width:1000px){
+  .hero{position:static;grid-template-columns:minmax(0,1fr)}
+  .grid22,.ledgercols{grid-template-columns:minmax(0,1fr)}
+}
+
+/* 扣除明細：像 Excel 的表格，淺藍與白色交錯，總計用紫色 */
+.ledger{display:block;border-radius:16px;overflow:hidden;border:2px solid var(--xl-line);background:var(--surface);box-shadow:0 4px 10px var(--lo)}
+.lrow{display:flex;justify-content:space-between;align-items:center;gap:12px;border:0;border-bottom:1px solid var(--xl-line);border-radius:0;box-shadow:none;padding:11px 20px;font-size:20px;background:var(--surface);color:var(--ink)}
+.lrow.xa{background:var(--xl-a)}
+.lrow.xb{background:var(--surface)}
+.lrow.lhead{background:var(--xl-head);font-weight:700;font-size:18px;padding:8px 20px}
+.lrow b{font:600 24px var(--f-num);white-space:nowrap}
+.lrow.lhead b{font:700 18px var(--f-body)}
+.lrow.r-tot{background:var(--xl-tot);color:var(--xl-tot-i);border-bottom:0;border-top:2px solid var(--xl-tot-i);margin-top:0;padding:14px 20px;font-size:24px;font-weight:700}
+.lrow.r-tot b{font-size:36px}
+.lrow.zero{opacity:.55}
+
+/* 日曆標記工具列 */
+.brushbar{display:grid;gap:10px;background:var(--surface);border-radius:20px;padding:14px 16px;box-shadow:0 4px 10px var(--lo),inset 0 2px 2px var(--hi)}
+.brushlabel{font-size:19px;font-weight:700;color:var(--ci)}
+.brushes{display:flex;flex-wrap:wrap;gap:10px}
+.brush{display:inline-flex;align-items:center;gap:8px;font:400 20px/1 var(--f-body);color:var(--ink);background:var(--field);border:0;border-radius:999px;padding:6px 20px 6px 6px;cursor:pointer;
+  box-shadow:0 3px 6px var(--lo),inset 0 2px 2px var(--hi)}
+.brush[aria-checked="true"]{background:var(--surface);box-shadow:0 0 0 4px var(--lav-ink),0 6px 12px var(--lo)}
+.bs{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border-radius:50%;font:700 20px/1 var(--f-body);font-style:normal;box-shadow:inset 1px 2px 3px var(--hi),inset -1px -2px 4px var(--lo)}
+.bs.ers{background:var(--field);color:var(--ink)}
+.bs.moff{background:repeating-linear-gradient(45deg,var(--d-hol),var(--d-hol) 4px,var(--surface) 4px,var(--surface) 8px);color:var(--d-hol-i)}
+.bs.mon{background:var(--d-mon);color:var(--d-mon-i)}
+.brushhint{min-height:1.6em;font-size:18px;color:var(--ci)}
+.d.mtyp,.sw.mtyp,.bs.mtyp{background:var(--d-typ);color:var(--d-typ-i)}
+.d.mtrip,.sw.mtrip,.bs.mtrip{background:var(--d-trip);color:var(--d-trip-i)}
+.d.msport,.sw.msport,.bs.msport{background:var(--d-sport);color:var(--d-sport-i)}
+.d.mmh,.sw.mmh,.bs.mmh{background:var(--d-mh);color:var(--d-mh-i)}
+.d.mtyp,.d.mtrip,.d.msport,.d.mmh{font-weight:700;box-shadow:inset 1px 2px 3px var(--hi),inset -1px -2px 4px var(--lo)}
+
+/* 三張填寫卡：國語作業佔整列 */
+.grid22 .card.pk{grid-column:1 / -1}
+.grid22 .card.pk .fields{grid-template-columns:repeat(6,minmax(0,1fr))}
+/* 自訂項目 */
+.cubr{display:contents}
+.brush.cb{padding-right:8px}
+.cdel{border:0;background:var(--field);color:var(--ink);width:32px;height:32px;border-radius:50%;font:700 18px/1 var(--f-body);cursor:pointer;margin-left:4px;box-shadow:inset 0 2px 2px var(--hi)}
+.cuform{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.3fr) minmax(0,2fr) auto;gap:12px;align-items:end;background:var(--field);border-radius:18px;padding:12px 14px}
+.cuform[hidden]{display:none}
+.cuform select{font:500 22px var(--f-body);padding:12px 12px;border-radius:14px;border:2px solid var(--line);background:var(--surface);color:var(--ink);width:100%}
+.cuact{display:flex;gap:8px}
+.d.mc0,.sw.mc0,.bs.mc0{background:var(--d-c0);color:var(--d-c0-i)}
+.d.mc1,.sw.mc1,.bs.mc1{background:var(--d-c1);color:var(--d-c1-i)}
+.d.mc2,.sw.mc2,.bs.mc2{background:var(--d-c2);color:var(--d-c2-i)}
+.d.mc3,.sw.mc3,.bs.mc3{background:var(--d-c3);color:var(--d-c3-i)}
+.d.mc0,.d.mc1,.d.mc2,.d.mc3{font-weight:700;box-shadow:inset 1px 2px 3px var(--hi),inset -1px -2px 4px var(--lo)}
+
+/* 列印：一頁摘要 */
+@media print{
+  @page{size:A4;margin:12mm}
+  :root:root:root{--bg:#FAF7F2;--surface:#FFFDFA;--field:#F4ECE5;--ink:#43344A;--muted:#7B6C82;--line:#EFE3DC;--shadow:#E8DAD1;--hi:rgba(255,255,255,.7);--lo:rgba(110,70,90,.13);--press:rgba(100,60,90,.16);--m1:rgba(255,183,178,.45);--m2:rgba(181,234,215,.5);--m3:rgba(199,206,234,.55);--m4:rgba(255,229,180,.6);--pearl:#FFF6EA;--pearl2:#FFFEFB;--d-sch:#C9F0E0;--d-sch-i:#17614A;--d-hol:#FFAE8C;--d-hol-i:#7A2E10;--d-eve:#FFE066;--d-eve-i:#6B4700;--d-exam:#E1D5FA;--d-exam-i:#4B2C8F;--d-mon:#8FCBF0;--d-mon-i:#14507C;--d-typ:#7ED6D6;--d-typ-i:#0E5252;--d-trip:#CDE86B;--d-trip-i:#3F5200;--d-sport:#F7A8D8;--d-sport-i:#7A1F57;--d-mh:#FF9494;--d-mh-i:#7A1A1A;--xl-a:#E3F3FC;--xl-head:#BFE0F3;--xl-line:#CFE5F2;--xl-tot:#E4DAF8;--xl-tot-i:#3A2477;--d-c0:#C3C6FF;--d-c0-i:#2A2F8F;--d-c1:#EFD9AE;--d-c1-i:#6B4A12;--d-c2:#DAD2E6;--d-c2-i:#4A3F5C;--d-c3:#B9EBB0;--d-c3-i:#1F5A18;--rose:#FFB7B2;--rose2:#FFD7D3;--rose-sh:rgba(235,135,128,.38);--rose-ink:#8A2B33;--peach:#FFDAC1;--peach2:#FFEBDD;--peach-sh:rgba(240,165,115,.36);--peach-ink:#8A4220;--butter:#FFE5B4;--butter2:#FFF3DA;--butter-sh:rgba(232,185,95,.4);--butter-ink:#7A5200;--mint:#B5EAD7;--mint2:#D7F6EA;--mint-sh:rgba(105,200,165,.38);--mint-ink:#1F6A4F;--sky:#BEE5F6;--sky2:#E0F4FC;--sky-sh:rgba(100,170,225,.4);--sky-ink:#1B5E8F;--lav:#E3D6F5;--lav2:#F2EBFC;--lav-sh:rgba(175,145,222,.4);--lav-ink:#5A3F99;color-scheme:light}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  body{font-size:12px;padding:0}
+  .noprint,.tabs,.mini,.notice,.hero-actions{display:none!important}
+  .po{display:block}
+  .cols{grid-template-columns:minmax(0,1fr)}
+  .card{box-shadow:none;break-inside:avoid;padding:12px}
+  .cal{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+  .mascot,.mwrap{width:64px}
+  .spark,.cf{display:none!important}
+  body{background-image:none}
+  .card{box-shadow:none}
+  .mwrap .mascot{filter:none}
+  .big{font-size:40px}
+  .po p{margin:2px 0}
+  h1{font-size:22px}
+  .exam-name{font-size:20px}
+  .say{font-size:14px}
+  .range-line,.meta,.pill{font-size:12px}
+  .stat h2{font-size:14px}
+  .card .tag{font-size:16px;padding:3px 14px}
+  .ledger td{font-size:13px}
+  .ledger td:last-child{font-size:14px}
+  .ledger tr.total td:last-child{font-size:20px}
+  .hol label{font-size:14px}
+  .hol .hw,.hol .hb{font-size:11px}
+  .mo h3{font-size:14px}
+  .wh{font-size:10px}
+  .d{font-size:11px}
+  .d::after{font-size:8px;min-height:8px}
+  .cal{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .d{min-height:0;aspect-ratio:1}
+  .mo{padding:6px}
+  .mg{gap:2px}
+  .wrap{max-width:none}
+  .hero{position:static;display:block}
+  .hero .stats{margin-top:8px}
+  .ledgercols{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+  .lrow{font-size:13px;padding:5px 14px;box-shadow:none}
+  .lrow b{font-size:15px}
+  .lrow.r-tot b{font-size:20px}
+  .hero .stat .meta{display:block}
+  .card.la .legend{font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <h1>國小教學作業排程與上學日估算器</h1>
+      <p class="sub" id="todayLine"></p>
+      <div class="dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="tabs" role="tablist" aria-label="考試情境">
+      <button type="button" role="tab" id="tab-mid" data-tab="mid" aria-selected="true">期中考</button>
+      <button type="button" role="tab" id="tab-fin" data-tab="fin" aria-selected="false">期末考</button>
+    </div>
+    <div class="hero-actions">
+      <button type="button" class="btn ghost" id="copyBtn">複製摘要</button>
+      <span class="toast" id="toast" role="status"></span>
+    </div>
+  </header>
+
+  <div class="notice" id="notice" role="status" hidden></div>
+
+  <textarea class="sumbox" id="sumBox" aria-label="摘要文字，可全選複製" readonly hidden></textarea>
+
+  <section class="card le hero" aria-label="計算結果" aria-live="polite">
+    <div class="hero-top">
+      <div class="mwrap" id="mwrap">
+      <svg id="mascot" class="mascot" viewBox="0 0 120 120" role="img" aria-label="小雞助教，表情隨進度變化" data-mood="good">
+        <path class="line" d="M55 27 Q52 17 47 16 M60 26 Q61 14 60 9 M65 27 Q69 17 75 17"/>
+        <ellipse class="foot o" cx="47" cy="108" rx="9" ry="4.5"/>
+        <ellipse class="foot o" cx="73" cy="108" rx="9" ry="4.5"/>
+        <ellipse class="body o" cx="60" cy="66" rx="44" ry="42"/>
+        <ellipse class="hl" cx="37" cy="45" rx="15" ry="8" transform="rotate(-32 37 45)"/>
+        <ellipse class="belly" cx="60" cy="87" rx="24" ry="16"/>
+        <g class="g-good">
+          <ellipse class="wing o" cx="15" cy="60" rx="9" ry="15" transform="rotate(-28 15 60)"/>
+          <ellipse class="wing o" cx="105" cy="60" rx="9" ry="15" transform="rotate(28 105 60)"/>
+        </g>
+        <g class="g-ok">
+          <ellipse class="wing o" cx="15" cy="75" rx="9" ry="15" transform="rotate(8 15 75)"/>
+          <ellipse class="wing o" cx="105" cy="75" rx="9" ry="15" transform="rotate(-8 105 75)"/>
+        </g>
+        <g class="g-bad">
+          <ellipse class="wing o" cx="15" cy="76" rx="9" ry="15" transform="rotate(14 15 76)"/>
+          <ellipse class="wing o" cx="105" cy="76" rx="9" ry="15" transform="rotate(-14 105 76)"/>
+        </g>
+        <ellipse class="blush" cx="33" cy="70" rx="8" ry="5"/>
+        <ellipse class="blush" cx="87" cy="70" rx="8" ry="5"/>
+        <g class="g-good">
+          <path class="line" d="M40 58 Q46 50 52 58 M68 58 Q74 50 80 58"/>
+          <path class="beak o" d="M52 65 Q60 61 68 65 Q67 79 60 80 Q53 79 52 65 Z"/>
+          <ellipse class="tongue" cx="60" cy="75" rx="4" ry="2.6"/>
+        </g>
+        <g class="g-ok">
+          <circle class="dot" cx="46" cy="58" r="5"/><circle class="dot" cx="74" cy="58" r="5"/>
+          <circle class="hi" cx="47.6" cy="56.2" r="1.6"/><circle class="hi" cx="75.6" cy="56.2" r="1.6"/>
+          <path class="beak o" d="M53 67 Q60 62 67 67 Q60 75 53 67 Z"/>
+        </g>
+        <g class="g-bad">
+          <circle class="dot" cx="46" cy="59" r="6"/><circle class="dot" cx="74" cy="59" r="6"/>
+          <circle class="hi" cx="48" cy="56.6" r="2"/><circle class="hi" cx="76" cy="56.6" r="2"/>
+          <path class="line" d="M37 47 L53 52 M83 47 L67 52"/>
+          <path class="beak o" d="M54 70 Q60 66 66 70 Q60 76 54 70 Z"/>
+          <path class="drop" d="M99 40 Q105 50 99 55 Q93 50 99 40 Z"/>
+        </g>
+      </svg>
+      <span class="spark s1" aria-hidden="true">✦</span><span class="spark s2" aria-hidden="true">✦</span><span class="spark s3" aria-hidden="true">✦</span>
+      </div>
+      <div class="bubble">
+        <p class="exam-name" id="examName"></p>
+        <p class="range-line" id="rangeLine"></p>
+        <p class="say" id="sayText"></p>
+      </div>
+    </div>
+    <div class="stats">
+      <article class="stat avail" id="cAvail">
+        <h2>實際可用上學日</h2>
+        <p class="big"><span id="vAvail">0</span><small>天</small></p>
+        <p class="meta" id="mAvail"></p>
+      </article>
+      <article class="stat good" id="cZh">
+        <h2>國語剩餘緩衝天數</h2>
+        <p class="big" id="vZh"></p>
+        <p class="meta" id="mZh"></p>
+        <p class="pill" id="pZh"></p>
+      </article>
+      <article class="stat good" id="cMa">
+        <h2>數學剩餘緩衝天數</h2>
+        <p class="big" id="vMa"></p>
+        <p class="meta" id="mMa"></p>
+        <p class="pill" id="pMa"></p>
+      </article>
+    </div>
+  </section>
+
+  <div class="grid22">
+      <section class="card pi noprint" aria-labelledby="hDate">
+        <h2 id="hDate"><span class="tag">考試日期</span></h2>
+        <div class="fields">
+          <div class="field">
+            <label for="inStart">起始日</label>
+            <input type="date" id="inStart">
+            <p class="hint" id="startHint"></p>
+          </div>
+          <div class="field">
+            <label for="inEnd">截止日（考試第一天）</label>
+            <input type="date" id="inEnd">
+          </div>
+        </div>
+        <label class="check" id="linkRow" for="inLinked" hidden><input type="checkbox" id="inLinked"> 起始日自動等於「期中考截止日 + 2 天」</label>
+      </section>
+
+      <section class="card bl noprint" aria-labelledby="hMa">
+        <h2 id="hMa"><span class="tag">數學作業</span></h2>
+        <div class="fields c2">
+          <div class="field"><label for="maS1">數習 起始頁</label><input type="number" id="maS1" data-p="ma.s1" min="0" inputmode="numeric"></div>
+          <div class="field"><label for="maE1">數習 終點頁</label><input type="number" id="maE1" data-p="ma.e1" min="0" inputmode="numeric"></div>
+        </div>
+        <div class="fields c3">
+          <div class="field"><label for="maS2">數作 起始頁</label><input type="number" id="maS2" data-p="ma.s2" min="0" inputmode="numeric"></div>
+          <div class="field"><label for="maE2">數作 終點頁</label><input type="number" id="maE2" data-p="ma.e2" min="0" inputmode="numeric"></div>
+          <div class="field"><label for="maPer">每天指派面數</label><input type="number" id="maPer" data-p="ma.per" min="1" inputmode="numeric"></div>
+        </div>
+        <label class="check" id="mathLinkRow" for="inMaLinked" hidden><input type="checkbox" id="inMaLinked"> 起始頁自動等於「期中考終點頁 + 1」</label>
+        <p class="formula" id="maFormula"></p>
+        <p class="note">頁碼是範例，請改成你班上的進度。</p>
+      </section>
+
+      <section class="card pk noprint" aria-labelledby="hZh">
+        <h2 id="hZh"><span class="tag">國語作業</span></h2>
+        <div class="fields">
+          <div class="field"><label for="zhLessons">課數</label><input type="number" id="zhLessons" data-p="zh.lessons" min="0" inputmode="numeric"></div>
+          <div class="field"><label for="zhPer">每課天數</label><input type="number" id="zhPer" data-p="zh.per" min="0" inputmode="numeric"></div>
+          <div class="field"><label for="zhA">生甲（天）</label><input type="number" id="zhA" data-p="zh.a" min="0" inputmode="numeric"></div>
+          <div class="field"><label for="zhB">生乙（天）</label><input type="number" id="zhB" data-p="zh.b" min="0" inputmode="numeric"></div>
+          <div class="field"><label for="zhC">國習（天）</label><input type="number" id="zhC" data-p="zh.c" min="0" inputmode="numeric"></div>
+          <div class="field"><label for="zhD">國練（天）</label><input type="number" id="zhD" data-p="zh.d" min="0" inputmode="numeric"></div>
+        </div>
+        <p class="formula" id="zhFormula"></p>
+      </section>
+
+  </div>
+
+  <section class="card la" aria-labelledby="hCal">
+    <h2 id="hCal"><span class="tag">日曆圖</span></h2>
+    <div class="legend" id="legend">
+      <span><i class="sw sch"></i>上學日</span>
+      <span><i class="sw hol"></i>國定假日（休，自動）</span>
+      <span><i class="sw eve"></i>考前一天（前）</span>
+      <span><i class="sw exam"></i>考試（考）</span>
+      <span><i class="sw reh"></i>假日改上課（課）</span>
+    </div>
+    <div class="brushbar noprint">
+      <p class="brushlabel">先選一個項目，再點日曆上的日期（選好後可以連續點）</p>
+      <div class="brushes" id="brushes" role="radiogroup" aria-label="日曆標記項目">
+        <button type="button" class="brush" role="radio" aria-checked="true" data-brush="typ"><i class="bs mtyp">颱</i>颱風假</button>
+        <button type="button" class="brush" role="radio" aria-checked="false" data-brush="trip"><i class="bs mtrip">校</i>校外教學</button>
+        <button type="button" class="brush" role="radio" aria-checked="false" data-brush="sport"><i class="bs msport">運</i>運動會補假</button>
+        <button type="button" class="brush" role="radio" aria-checked="false" data-brush="mh"><i class="bs mmh">假</i>國定假日</button>
+        <button type="button" class="brush" role="radio" aria-checked="false" data-brush="off"><i class="bs moff">停</i>其他停課</button>
+        <button type="button" class="brush" role="radio" aria-checked="false" data-brush="on"><i class="bs mon">補</i>補課／改上課</button>
+        <span id="cuBrushes" class="cubr"></span>
+        <button type="button" class="brush" role="radio" aria-checked="false" data-brush="erase"><i class="bs ers">↺</i>還原</button>
+        <button type="button" class="brush addcu" id="cuAddBtn"><i class="bs ers">＋</i>新增自訂項目</button>
+      </div>
+      <form class="cuform" id="cuForm" autocomplete="off" hidden>
+        <div class="field"><label for="cuName">項目名稱</label><input type="text" id="cuName" maxlength="8" placeholder="例如：停電停課"></div>
+        <div class="field"><label for="cuAb">日曆縮寫（1 個字）</label><input type="text" id="cuAb" maxlength="2" placeholder="電"></div>
+        <div class="field"><label for="cuK">對天數的影響</label><select id="cuK"><option value="off">停課，扣 1 天</option><option value="on">補課，加 1 天（點週末）</option></select></div>
+        <div class="cuact"><button type="submit" class="btn">新增</button><button type="button" class="btn ghost" id="cuCancel">取消</button></div>
+      </form>
+      <p class="brushhint" id="brushHint" role="status"></p>
+    </div>
+    <div class="cal" id="cal"></div>
+  </section>
+
+  <section class="card pe" aria-labelledby="hLedger">
+    <h2 id="hLedger"><span class="tag">扣除明細</span></h2>
+    <div class="ledgercols">
+      <div class="ledger" id="ledger"></div>
+      <div class="holbox">
+        <h3>國定假日（取消勾選，該天就算上學日）</h3>
+        <ul class="hol" id="holList"></ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="card le po" aria-label="計算說明">
+    <h2><span class="tag">計算說明</span></h2>
+    <p id="poRange"></p>
+    <p id="poZh"></p>
+    <p id="poMa"></p>
+    <p id="poAdj"></p>
+  </section>
+
+  <footer class="foot noprint">
+    <p>計算方式：區間是起始日到截止日的前一天，扣掉週末、已勾選的國定假日、考前一天，再加減日曆上標記的天數。假日逢週六補前一個上班日，逢週日補後一個上班日。輸入的內容只存在這台裝置的瀏覽器裡。要列印時用瀏覽器的列印功能，版面會排成一頁。</p>
+    <button type="button" class="btn ghost sm" id="resetBtn">恢復預設值</button>
+  </footer>
+</div>
+
+<div class="mini noprint" id="mini" aria-hidden="true">
+  <span id="miniAvail"></span><span id="miniZh"></span><span id="miniMa"></span>
+</div>
+
+<script>
+/* ===== 日期與假日核心（純函式，無 DOM） ===== */
+const MS = 86400000;
+const WD = ['日', '一', '二', '三', '四', '五', '六'];
+const pad = n => String(n).padStart(2, '0');
+const keyOf = (y, m, d) => y + '-' + pad(m) + '-' + pad(d);
+const parseKey = s => { const p = s.split('-').map(Number); return Date.UTC(p[0], p[1] - 1, p[2]); };
+const toKey = ms => { const d = new Date(ms); return keyOf(d.getUTCFullYear(), d.getUTCMonth() + 1, d.getUTCDate()); };
+const dow = ms => new Date(ms).getUTCDay();
+const isWD = ms => { const w = dow(ms); return w > 0 && w < 6; };
+const md = ms => { const d = new Date(ms); return (d.getUTCMonth() + 1) + '/' + d.getUTCDate(); };
+const mdw = ms => md(ms) + '（' + WD[dow(ms)] + '）';
+
+/* 農曆：優先用瀏覽器內建的農曆日曆；萬一不支援，改用 2026–2030 備用表 */
+let lunarFmt = null;
+try { lunarFmt = new Intl.DateTimeFormat('en-u-ca-chinese', { timeZone: 'UTC', month: 'numeric', day: 'numeric' }); } catch (e) { lunarFmt = null; }
+const FB_MID = { 2026: '2026-09-25', 2027: '2027-09-15', 2028: '2028-10-03', 2029: '2029-09-22', 2030: '2030-09-12' };
+const FB_DRAGON = { 2026: '2026-06-19', 2027: '2027-06-09', 2028: '2028-05-28', 2029: '2029-06-16', 2030: '2030-06-05' };
+function lunarOf(ms) {
+  let m = null, d = null;
+  lunarFmt.formatToParts(new Date(ms)).forEach(p => { if (p.type === 'month') m = p.value; if (p.type === 'day') d = Number(p.value); });
+  return { m, d };
+}
+const lunarCache = {};
+function findLunar(year, lm, ld, fb) {
+  const k = year + '/' + lm + '/' + ld;
+  if (k in lunarCache) return lunarCache[k];
+  let res = null;
+  if (lunarFmt) {
+    try {
+      for (let ms = Date.UTC(year, 0, 1), end = Date.UTC(year, 11, 31); ms <= end; ms += MS) {
+        const l = lunarOf(ms);
+        if (l.m === String(lm) && l.d === ld) { res = ms; break; }   // 閏月的月份值帶 "bis"，不會誤中
+      }
+    } catch (e) { res = null; }
+  }
+  if (res === null && fb && fb[year]) res = parseKey(fb[year]);
+  lunarCache[k] = res;
+  return res;
+}
+/* 清明：2001–2099 年的節氣公式，結果只會是 4/4 或 4/5 */
+function qingmingDay(y) { const t = y % 100; return Math.floor(t * 0.2422 + 4.81) - Math.floor(t / 4); }
+
+/* 區間 [s, last] 內會停課的假日（含補假）。每筆：name, nat(原日期), act(實際放假日), makeup, note, id */
+function holidaysFor(s, last) {
+  if (last < s) return [];
+  const y0 = new Date(s).getUTCFullYear() - 0, y1 = new Date(last).getUTCFullYear();
+  const items = [];
+  const add = (name, ms, note) => { if (ms !== null && ms !== undefined) items.push({ name, nat: ms, note: note || '' }); };
+  for (let y = y0; y <= y1; y++) {
+    const q = qingmingDay(y);
+    add('元旦（開國紀念日）', Date.UTC(y, 0, 1));
+    add('二二八和平紀念日', Date.UTC(y, 1, 28));
+    add('兒童節', q === 4 ? Date.UTC(y, 3, 3) : Date.UTC(y, 3, 4), q === 4 ? '與清明同日，兒童節前移一天' : '');
+    add('清明節', Date.UTC(y, 3, q));
+    add('勞動節', Date.UTC(y, 4, 1));
+    add('端午節', findLunar(y, 5, 5, FB_DRAGON));
+    add('中秋節', findLunar(y, 8, 15, FB_MID));
+    add('教師節', Date.UTC(y, 8, 28));
+    add('國慶日', Date.UTC(y, 9, 10));
+    add('光復節', Date.UTC(y, 9, 25));
+    add('行憲紀念日', Date.UTC(y, 11, 25));
+  }
+  items.sort((a, b) => a.nat - b.nat);
+  const taken = new Set();
+  items.forEach(it => { if (isWD(it.nat)) { taken.add(it.nat); it.act = it.nat; it.makeup = false; } });
+  const nearest = (ms, dir) => { let t = ms; do { t += dir * MS; } while (!isWD(t)); return t; };
+  items.forEach(it => {
+    if (it.act !== undefined) return;
+    const pref = dow(it.nat) === 6 ? -1 : 1;     // 週六補前一個上班日，週日補後一個上班日
+    let t = nearest(it.nat, pref);
+    if (taken.has(t)) {                           // 該天已是假日：改補另一側，兩側都滿才往原方向順延
+      const o = nearest(it.nat, -pref);
+      if (!taken.has(o)) t = o; else { while (taken.has(t)) t = nearest(t, pref); }
+    }
+    taken.add(t); it.act = t; it.makeup = true;
+  });
+  items.forEach(it => { it.id = it.name + '@' + toKey(it.nat); });
+  return items.filter(it => it.act >= s && it.act <= last);
+}
+
+/* 可用上學日。s=起始日，e=截止日（考試第一天）；區間為 s ～ e 前一天。
+   manual：日曆上手動標記，{ 'YYYY-MM-DD': 類型 }。
+   停課類：off 其他停課、typ 颱風假、trip 校外教學、sport 運動會補假、mh 手動新增的國定假日（各扣 1 天）
+   on：週末補課（加 1 天） */
+const OFFT = { off: 1, typ: 1, trip: 1, sport: 1, mh: 1 };
+function calcDays(s, e, offIds, adjTotal, manual, custom) {
+  const last = e - MS;
+  manual = manual || {};
+  custom = custom || {};
+  // 標記類型：'off'（停課，平日扣 1 天）、'on'（補課，週末加 1 天）、''（無）
+  const typeOf = v => OFFT[v] ? 'off' : v === 'on' ? 'on' : (custom[v] || '');
+  let weekdays = 0;
+  for (let ms = s; ms <= last; ms += MS) if (isWD(ms)) weekdays++;
+  const hol = holidaysFor(s, last);
+  const off = new Set(offIds || []);
+  const deducted = hol.filter(h => !off.has(h.id));
+  const dedSet = new Set(deducted.map(h => h.act));
+  let mOff = 0, mOn = 0;
+  const mBy = { off: 0, typ: 0, trip: 0, sport: 0, mh: 0, on: 0 };
+  for (let ms = s; ms <= last; ms += MS) {
+    const v = manual[toKey(ms)];
+    const ty = typeOf(v);
+    if (ty === 'off' && isWD(ms) && !dedSet.has(ms)) { mBy[v] = (mBy[v] || 0) + 1; mOff++; }   // 已是國定假日的日子不重複扣
+    if (ty === 'on' && !isWD(ms)) { mBy[v] = (mBy[v] || 0) + 1; mOn++; }                       // 只有週末能補課
+  }
+  const isSchool = ms => {
+    const v = manual[toKey(ms)];
+    return isWD(ms) ? (!dedSet.has(ms) && typeOf(v) !== 'off') : typeOf(v) === 'on';
+  };
+  let eveMs = null;
+  for (let ms = last; ms >= s; ms -= MS) { if (isSchool(ms)) { eveMs = ms; break; } }
+  const eve = eveMs === null ? 0 : 1;
+  const avail = weekdays - deducted.length - mOff + mOn - eve + (adjTotal || 0);
+  return { s, e, last, valid: last >= s, weekdays, hol, deducted, dedSet, eveMs, eve, adjTotal: adjTotal || 0, mOff, mOn, mBy, avail };
+}
+
+/* 國語、數學需要天數 */
+function zhNeed(z) { return z.lessons * z.per + z.a + z.b + z.c + z.d; }
+function pagesOf(a, b) { return b >= a && b > 0 ? b - a + 1 : 0; }
+function mathNeed(m) {
+  const p1 = pagesOf(m.s1, m.e1), p2 = pagesOf(m.s2, m.e2), per = Math.max(1, m.per);
+  return { p1, p2, d1: Math.ceil(p1 / per), d2: Math.ceil(p2 / per), total: Math.ceil(p1 / per) + Math.ceil(p2 / per) };
+}
+
+/* 學期判斷與預設日期。today = {y, m, d} */
+function makeDefaults(t) {
+  let sem, ay;
+  if (t.m >= 8) { sem = '上'; ay = t.y; }
+  else if (t.m === 1) { sem = '上'; ay = t.y - 1; }
+  else { sem = '下'; ay = t.y - 1; }
+  let midStart, midEnd, finEnd;
+  if (sem === '上') { midStart = keyOf(ay, 8, 31); midEnd = keyOf(ay, 11, 5); finEnd = keyOf(ay + 1, 1, 12); }
+  else { midStart = keyOf(ay + 1, 2, 23); midEnd = keyOf(ay + 1, 4, 21); finEnd = keyOf(ay + 1, 6, 17); }
+  const finStart = toKey(parseKey(midEnd) + 2 * MS);
+  const mk = (start, end, d, math) => ({
+    start, end, linked: true, maLinked: true, off: [], adj: [], mo: {},
+    zh: { lessons: 6, per: 5, a: 1, b: 1, c: 1, d },
+    ma: math
+  });
+  return {
+    ay, sem,
+    mid: mk(midStart, midEnd, 3, { s1: 1, e1: 40, s2: 1, e2: 36, per: 2 }),
+    fin: mk(finStart, finEnd, 4, { s1: 41, e1: 80, s2: 37, e2: 72, per: 2 })
+  };
+}
+
+
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var LS = 'hw-planner-v1';
+  var DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+  var now = new Date();
+  var TODAY = { y: now.getFullYear(), m: now.getMonth() + 1, d: now.getDate() };
+  var TODAY_MS = Date.UTC(TODAY.y, TODAY.m - 1, TODAY.d);
+  var DEF = makeDefaults(TODAY);
+  var YEAR_LABEL = (DEF.ay - 1911) + ' 學年度' + DEF.sem + '學期';
+
+  function merge(d, o) {
+    if (Array.isArray(d)) return Array.isArray(o) ? o : d;
+    if (d && typeof d === 'object' && !Array.isArray(d) && Object.keys(d).length === 0) return (o && typeof o === 'object' && !Array.isArray(o)) ? o : d;
+    if (d && typeof d === 'object') {
+      var r = {};
+      for (var k in d) r[k] = merge(d[k], (o && typeof o === 'object') ? o[k] : undefined);
+      return r;
+    }
+    return (typeof o === typeof d && o === o) ? o : d;
+  }
+  var BR = { typ: ['颱風假', '颱'], trip: ['校外教學', '校'], sport: ['運動會補假', '運'], mh: ['國定假日', '假'], off: ['其他停課', '停'], on: ['補課', '補'] };
+  var MCLS = { off: 'moff', typ: 'mtyp', trip: 'mtrip', sport: 'msport', mh: 'mmh', on: 'mon' };
+  DEF.cu = [];
+  var S = DEF;
+  try {
+    var raw = localStorage.getItem(LS);
+    if (raw) {
+      var o = JSON.parse(raw);
+      if (o && o.ay === DEF.ay && o.sem === DEF.sem) S = merge(DEF, o);
+    }
+  } catch (e) { S = DEF; }
+  ['mid', 'fin'].forEach(function (k) {
+    if (!DATE_RE.test(S[k].start)) S[k].start = DEF[k].start;
+    if (!DATE_RE.test(S[k].end)) S[k].end = DEF[k].end;
+  });
+  function syncFin() { if (S.fin.linked) S.fin.start = toKey(parseKey(S.mid.end) + 2 * MS); }
+  syncFin();
+  function syncMath() {
+    if (S.fin.maLinked) { S.fin.ma.s1 = S.mid.ma.e1 + 1; S.fin.ma.s2 = S.mid.ma.e2 + 1; }
+  }
+  syncMath();
+
+  S.cu = (Array.isArray(S.cu) ? S.cu : []).filter(function (x) { return x && /^c[0-3]$/.test(x.id) && typeof x.name === 'string' && (x.k === 'off' || x.k === 'on'); }).slice(0, 4);
+  var CUK = {};
+  function rebuildCu() {
+    CUK = {};
+    S.cu.forEach(function (x) { CUK[x.id] = x.k; BR[x.id] = [x.name, x.ab]; MCLS[x.id] = 'm' + x.id; });
+  }
+  function typeOf(v) { return OFFT[v] ? 'off' : v === 'on' ? 'on' : (CUK[v] || ''); }
+  rebuildCu();
+  ['mid', 'fin'].forEach(function (k) {
+    var mo = S[k].mo, clean = {};
+    Object.keys(mo).forEach(function (dk) { if (DATE_RE.test(dk) && (mo[dk] === 'on' || OFFT[mo[dk]] || CUK[mo[dk]])) clean[dk] = mo[dk]; });
+    S[k].mo = clean;
+  });
+  var tab = TODAY_MS >= parseKey(S.mid.end) ? 'fin' : 'mid';
+  var autoSwitched = tab === 'fin';
+
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function sgn(n) { return n > 0 ? '+' + n : n < 0 ? '−' + (-n) : '0'; }
+  function statusOf(b) {
+    if (b > 0) return { k: 'good', face: '😄', label: '充裕', tail: '還有 ' + b + ' 天緩衝' };
+    if (b === 0) return { k: 'ok', face: '😐', label: '剛好', tail: '剛好排滿' };
+    return { k: 'bad', face: '😱', label: '超載', tail: '差 ' + (-b) + ' 天' };
+  }
+  function compute(k) {
+    var e = S[k];
+    var c = calcDays(parseKey(e.start), parseKey(e.end), e.off, 0, e.mo, CUK);
+    var zn = zhNeed(e.zh), mn = mathNeed(e.ma);
+    return { k: k, e: e, c: c, zn: zn, mn: mn, zb: c.avail - zn, mb: c.avail - mn.total };
+  }
+
+  function save() { try { localStorage.setItem(LS, JSON.stringify(Object.assign({}, S, { ay: DEF.ay, sem: DEF.sem }))); } catch (e) { } }
+
+  /* ---------- 輸入欄位 ---------- */
+  function fillInputs() {
+    var e = S[tab], linked = tab === 'fin' && S.fin.linked;
+    $('inStart').value = e.start; $('inStart').disabled = linked;
+    $('inEnd').value = e.end;
+    $('linkRow').hidden = tab !== 'fin';
+    $('inLinked').checked = S.fin.linked;
+    var ml = tab === 'fin' && S.fin.maLinked;
+    $('maS1').disabled = ml; $('maS2').disabled = ml;
+    $('mathLinkRow').hidden = tab !== 'fin';
+    $('inMaLinked').checked = S.fin.maLinked;
+    document.querySelectorAll('[data-p]').forEach(function (inp) {
+      var p = inp.dataset.p.split('.'); inp.value = e[p[0]][p[1]];
+    });
+  }
+
+  /* ---------- 動態效果 ---------- */
+  var REDUCE = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  var cur = {}, tkn = 0, lastMood = null;
+  var brush = 'typ';
+  function manualText(c) {
+    return Object.keys(c.mBy).filter(function (k) { return c.mBy[k]; }).map(function (k) { return (BR[k] ? BR[k][0] : k) + ' ' + c.mBy[k] + ' 天'; }).join('、');
+  }
+  function tween(el, key, to, render) {
+    var from = (key in cur) ? cur[key] : to;
+    cur[key] = to;
+    var my = ++tkn; el._tk = my;
+    if (REDUCE || from === to) { render(to); return; }
+    var t0 = performance.now(), dur = 420;
+    function step(now) {
+      if (el._tk !== my) return;
+      var p = Math.min(1, (now - t0) / dur), ease = 1 - Math.pow(1 - p, 3);
+      render(Math.round(from + (to - from) * ease));
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+    setTimeout(function () { if (el._tk === my) render(to); }, dur + 150);
+  }
+  function cheer(confetti) {
+    if (REDUCE) return;
+    var m = $('mascot');
+    m.classList.remove('hop'); void m.getBoundingClientRect(); m.classList.add('hop');
+    setTimeout(function () { m.classList.remove('hop'); }, 800);
+    if (!confetti) return;
+    var host = $('mwrap'), cols = ['--rose', '--peach', '--butter', '--mint', '--sky', '--lav'];
+    for (var i = 0; i < 16; i++) {
+      var s = document.createElement('i'), ang = Math.random() * Math.PI * 2, dist = 46 + Math.random() * 56;
+      s.className = 'cf';
+      s.style.setProperty('--dx', Math.round(Math.cos(ang) * dist) + 'px');
+      s.style.setProperty('--dy', Math.round(Math.sin(ang) * dist - 24) + 'px');
+      s.style.background = 'var(' + cols[i % 6] + ')';
+      host.appendChild(s);
+      (function (n) { setTimeout(function () { n.remove(); }, 1000); })(s);
+    }
+  }
+
+  /* ---------- 繪製 ---------- */
+  function setStat(id, buf, need, avail) {
+    var st = statusOf(buf);
+    var card = $('c' + id), prevK = card.dataset.k;
+    card.className = 'stat ' + st.k + (prevK && prevK !== st.k ? ' pop' : ''); card.dataset.k = st.k;
+    tween($('v' + id), 'v' + id, buf, function (v) { $('v' + id).innerHTML = sgn(v) + '<small>天</small>'; });
+    $('m' + id).textContent = '需要 ' + need + ' 天・可用 ' + avail + ' 天';
+    $('p' + id).textContent = st.face + ' ' + st.label;
+    return st;
+  }
+  function renderHero(R) {
+    var c = R.c;
+    var extra = c.adjTotal + c.mOn - c.mOff;
+    $('examName').textContent = (tab === 'mid' ? '期中考' : '期末考') + '・' + YEAR_LABEL;
+    $('rangeLine').textContent = c.valid ? '計算區間 ' + mdw(c.s) + ' ～ ' + mdw(c.last) + '，截止日 ' + mdw(c.e) : '截止日要晚於起始日，請檢查日期';
+    tween($('vAvail'), 'vAvail', c.avail, function (v) { $('vAvail').textContent = v; });
+    $('mAvail').textContent = c.valid
+      ? '平日 ' + c.weekdays + ' − 假日 ' + c.deducted.length + ' − 考前一天 ' + c.eve + (extra ? (extra > 0 ? ' + 標記 ' : ' − 標記 ') + Math.abs(extra) : '')
+      : '請先修正日期';
+    var sz = setStat('Zh', R.zb, R.zn, c.avail);
+    var sm = setStat('Ma', R.mb, R.mn.total, c.avail);
+    var worst = Math.min(R.zb, R.mb), mood = worst > 0 ? 'good' : worst === 0 ? 'ok' : 'bad';
+    $('mascot').setAttribute('data-mood', mood);
+    if (lastMood !== null && lastMood !== mood) cheer(mood === 'good');
+    lastMood = mood;
+    var say;
+    if (!c.valid) say = '日期怪怪的，先看看起始日和截止日。';
+    else if (worst > 0) say = R.zb === R.mb ? '國語和數學都排得下，還有 ' + worst + ' 天可以排其他作業。' : '國語和數學都排得下，國語還有 ' + R.zb + ' 天、數學還有 ' + R.mb + ' 天可以排其他作業。';
+    else if (worst === 0) say = '剛好排滿，沒有多餘的天數排其他作業，也不能再停課了。';
+    else {
+      var who = [R.zb < 0 ? '國語' : '', R.mb < 0 ? '數學' : ''].filter(Boolean).join('、');
+      say = who + '超載了，想想哪裡可以精簡，或找補課日。';
+    }
+    $('sayText').textContent = say;
+    var m = $('mini');
+    $('miniAvail').textContent = '可用 ' + c.avail + ' 天';
+    $('miniZh').textContent = '國語 ' + sgn(R.zb) + ' ' + sz.face; $('miniZh').className = sz.k;
+    $('miniMa').textContent = '數學 ' + sgn(R.mb) + ' ' + sm.face; $('miniMa').className = sm.k;
+  }
+  function renderFacts(R) {
+    var c = R.c, e = R.e, out = [];
+    var s = parseKey(e.start);
+    $('startHint').textContent = !c.valid ? '截止日要晚於起始日，請檢查日期' : !isWD(s) ? '這天是週' + WD[dow(s)] + '，實際從 ' + mdw(s + (dow(s) === 6 ? 2 : 1) * MS) + ' 起算' : '';
+    if (!c.valid) { out.push('<li class="chip warn">截止日要晚於起始日</li>'); }
+    else {
+      out.push('<li class="chip">計算區間 ' + mdw(c.s) + ' ～ ' + mdw(c.last) + '，共 ' + c.weekdays + ' 個平日</li>');
+      out.push('<li class="chip nohw">不派作業：考前一天 ' + (c.eveMs ? mdw(c.eveMs) : '—') + '、考試 ' + md(c.e) + '～' + md(c.e + MS) + '</li>');
+    }
+    if (tab === 'fin' && S.fin.linked) {
+      var me = parseKey(S.mid.end);
+      out.push('<li class="chip">起始日 = 期中截止日 ' + mdw(me) + ' + 2 天</li>');
+    }
+  }
+  function renderLedger(R) {
+    var c = R.c;
+    var rows = [
+      ['區間內的平日 ' + md(c.s) + '～' + (c.valid ? md(c.last) : '—'), c.weekdays + ' 天', false],
+      ['國定假日（勾選 ' + c.deducted.length + ' 個）', '−' + c.deducted.length, c.deducted.length === 0],
+      ['考前一天不派作業' + (c.eveMs ? '（' + md(c.eveMs) + '）' : ''), '−' + c.eve, c.eve === 0]
+    ];
+    var before = rows.length;
+    Object.keys(c.mBy).forEach(function (k) {
+      if (!c.mBy[k]) return;
+      if (typeOf(k) === 'on') rows.push([BR[k][0] + '（週末上課 ' + c.mBy[k] + ' 天）', '+' + c.mBy[k], false]);
+      else rows.push([BR[k][0] + '（日曆標記 ' + c.mBy[k] + ' 天）', '−' + c.mBy[k], false]);
+    });
+    if (rows.length === before) rows.push(['日曆標記（目前沒有）', '0', true]);
+    $('ledger').innerHTML = '<div class="lrow lhead"><span>項目</span><b>天數</b></div>' +
+      rows.map(function (r, i) {
+        return '<div class="lrow ' + (i % 2 === 0 ? 'xa' : 'xb') + (r[2] ? ' zero' : '') + '"><span>' + r[0] + '</span><b>' + r[1] + '</b></div>';
+      }).join('') + '<div class="lrow r-tot"><span>可用上學日</span><b>' + c.avail + ' 天</b></div>';
+  }
+  function renderHolidays(R) {
+    var ul = $('holList'), off = new Set(R.e.off);
+    if (!R.c.hol.length) { ul.innerHTML = '<li class="empty" style="display:block">這段期間沒有需要扣除的國定假日。</li>'; return; }
+    ul.innerHTML = R.c.hol.map(function (h) {
+      var on = !off.has(h.id);
+      var when = h.makeup ? mdw(h.nat) + ' 逢週末，補假 ' + mdw(h.act) : mdw(h.act);
+      if (h.note) when += '（' + h.note + '）';
+      return '<li class="' + (on ? '' : 'off') + '"><label><input type="checkbox" data-hid="' + esc(h.id) + '"' + (on ? ' checked' : '') + '><span>' + esc(h.name) + '</span></label>' +
+        '<span class="hw">' + when + '</span><span class="hb">' + (on ? '−1 天' : '照常上課') + '</span></li>';
+    }).join('');
+  }
+  function renderCal(R) {
+    var c = R.c, e = R.e, man = e.mo || {};
+    var s = parseKey(e.start), en = parseKey(e.end);
+    var offSet = new Set(e.off), reh = new Set();
+    c.hol.forEach(function (h) { if (offSet.has(h.id)) reh.add(h.act); });
+    var holName = {}, holId = {};
+    c.hol.forEach(function (h) { holName[h.act] = h.name + (h.makeup ? '（補假）' : ''); holId[h.act] = h.id; });
+    var a = new Date(s), b = new Date(en + MS);
+    var y = a.getUTCFullYear(), m = a.getUTCMonth(), yEnd = b.getUTCFullYear(), mEnd = b.getUTCMonth(), html = '', guard = 0;
+    while ((y < yEnd || (y === yEnd && m <= mEnd)) && guard++ < 8) {
+      var first = Date.UTC(y, m, 1), days = new Date(Date.UTC(y, m + 1, 0)).getUTCDate(), lead = dow(first);
+      var cells = WD.map(function (w) { return '<div class="wh">' + w + '</div>'; }).join('');
+      for (var i = 0; i < lead; i++) cells += '<div></div>';
+      for (var d = 1; d <= days; d++) {
+        var ms = Date.UTC(y, m, d), k = toKey(ms), cls = '', tag = '', ttl = '', kind = '', hid = '';
+        var inR = ms >= c.s && ms <= c.last, mv = man[k];
+        if (ms === en || ms === en + MS) { cls = 'exam'; tag = '考'; ttl = '考試'; }
+        else if (!inR) cls = 'out';
+        else if (ms === c.eveMs) {
+          cls = 'eve'; tag = '前'; ttl = '考前一天，不派作業';
+          if (typeOf(mv) === 'on' && !isWD(ms)) { cls = MCLS[mv]; tag = BR[mv][1]; ttl = BR[mv][0] + '，也是考前一天，不派作業'; kind = 'mk'; }
+          else if (isWD(ms)) kind = 'sch';
+        }
+        else if (!isWD(ms)) {
+          if (typeOf(mv) === 'on') { cls = MCLS[mv]; tag = BR[mv][1]; ttl = BR[mv][0]; kind = 'mk'; }
+          else { cls = 'wk'; ttl = '週末'; kind = 'wk'; }
+        }
+        else if (c.dedSet.has(ms)) { cls = 'hol'; tag = '休'; ttl = (holName[ms] || '假日') + '（休）'; kind = 'hol'; hid = holId[ms] || ''; }
+        else if (typeOf(mv) === 'off') { cls = MCLS[mv]; tag = BR[mv][1]; ttl = BR[mv][0]; kind = 'mk'; }
+        else if (reh.has(ms)) { cls = 'reh'; tag = '課'; ttl = (holName[ms] || '假日') + '，已改上課'; kind = 'reh'; hid = holId[ms] || ''; }
+        else { cls = 'sch'; ttl = ''; kind = 'sch'; }
+        if (ms === TODAY_MS) cls += ' today';
+        var attrs = ' class="d ' + cls + '" data-t="' + tag + '"' + (ttl ? ' title="' + esc(ttl) + '"' : '');
+        cells += kind
+          ? '<button type="button"' + attrs + ' data-d="' + k + '" data-kind="' + kind + '"' + (mv ? ' data-mv="' + mv + '"' : '') + (hid ? ' data-hid="' + esc(hid) + '"' : '') + '>' + d + '</button>'
+          : '<div' + attrs + '>' + d + '</div>';
+      }
+      html += '<div class="mo"><h3>' + y + ' 年 ' + (m + 1) + ' 月</h3><div class="mg">' + cells + '</div></div>';
+      m++; if (m > 11) { m = 0; y++; }
+    }
+    $('cal').innerHTML = html;
+  }
+  function renderForms(R) {
+    var z = R.e.zh, ma = R.e.ma, mn = R.mn;
+    $('zhFormula').innerHTML = z.lessons + ' 課 × ' + z.per + ' 天 ＝ <b>' + (z.lessons * z.per) + '</b> 天；綜合練習 ' + z.a + '＋' + z.b + '＋' + z.c + '＋' + z.d + ' ＝ <b>' + (z.a + z.b + z.c + z.d) + '</b> 天；合計 <b>' + R.zn + '</b> 天';
+    var per = Math.max(1, ma.per);
+    $('maFormula').innerHTML = '數習 ' + mn.p1 + ' 面 ÷ ' + per + ' → <b>' + mn.d1 + '</b> 天；數作 ' + mn.p2 + ' 面 ÷ ' + per + ' → <b>' + mn.d2 + '</b> 天；合計 <b>' + mn.total + '</b> 天' +
+      ((ma.e1 < ma.s1 || ma.e2 < ma.s2) ? '（終點頁要大於等於起始頁）' : '');
+  }
+  function renderPrint(R) {
+    var c = R.c, z = R.e.zh, mn = R.mn;
+    $('poRange').textContent = (tab === 'mid' ? '期中考' : '期末考') + '：計算區間 ' + (c.valid ? mdw(c.s) + ' ～ ' + mdw(c.last) : '—') + '；列印日期 ' + TODAY.y + '/' + TODAY.m + '/' + TODAY.d;
+    $('poZh').textContent = '國語：' + z.lessons + ' 課 × ' + z.per + ' 天 + 綜合練習 ' + (z.a + z.b + z.c + z.d) + ' 天（生甲 ' + z.a + '、生乙 ' + z.b + '、國習 ' + z.c + '、國練 ' + z.d + '）＝ ' + R.zn + ' 天';
+    $('poMa').textContent = '數學：數習 ' + mn.p1 + ' 面 → ' + mn.d1 + ' 天，數作 ' + mn.p2 + ' 面 → ' + mn.d2 + ' 天，每天 ' + Math.max(1, R.e.ma.per) + ' 面 ＝ ' + mn.total + ' 天';
+    $('poAdj').textContent = '日曆標記：' + (c.mOff || c.mOn ? manualText(c) : '無');
+  }
+  function renderHeader() {
+    $('todayLine').textContent = '今天 ' + TODAY.y + '/' + TODAY.m + '/' + TODAY.d + '（' + WD[dow(TODAY_MS)] + '）・' + YEAR_LABEL;
+    ['mid', 'fin'].forEach(function (k) { $('tab-' + k).setAttribute('aria-selected', String(k === tab)); });
+    var n = $('notice');
+    if (autoSwitched && tab === 'fin') { n.hidden = false; n.textContent = '期中考截止日 ' + md(parseKey(S.mid.end)) + ' 已到，已幫你切到期末考。'; }
+    else n.hidden = true;
+  }
+  function update(opts) {
+    opts = opts || {};
+    var R = compute(tab);
+    renderHeader(); renderHero(R); renderFacts(R); renderLedger(R);
+    if (!opts.keepHol) renderHolidays(R);
+    renderCal(R); renderForms(R); renderPrint(R);
+    save();
+  }
+
+  /* ---------- 摘要與複製 ---------- */
+  function summaryText() {
+    var R = compute(tab), c = R.c, sz = statusOf(R.zb), sm = statusOf(R.mb);
+    var lines = [
+      '【' + (tab === 'mid' ? '期中考' : '期末考') + '】' + YEAR_LABEL,
+      '計算區間：' + mdw(c.s) + ' ～ ' + mdw(c.last),
+      '實際可用上學日：' + c.avail + ' 天（平日 ' + c.weekdays + ' − 假日 ' + c.deducted.length + ' − 考前一天 ' + c.eve + ((c.adjTotal + c.mOn - c.mOff) ? '，日曆標記 ' + sgn(c.adjTotal + c.mOn - c.mOff) : '') + '）',
+      '國語：需 ' + R.zn + ' 天，緩衝 ' + sgn(R.zb) + ' 天（' + sz.label + '）',
+      '數學：需 ' + R.mn.total + ' 天，緩衝 ' + sgn(R.mb) + ' 天（' + sm.label + '）',
+      '扣除的假日：' + (c.deducted.length ? c.deducted.map(function (h) { return h.name + ' ' + md(h.act); }).join('、') : '無')
+    ];
+    if (c.mOff || c.mOn) lines.push('日曆標記：' + manualText(c));
+    return lines.join('\n');
+  }
+  var toastTimer = null;
+  function toast(t) { $('toast').textContent = t; clearTimeout(toastTimer); toastTimer = setTimeout(function () { $('toast').textContent = ''; }, 2500); }
+  function copySummary() {
+    var t = summaryText();
+    var fallback = function () { var b = $('sumBox'); b.hidden = false; b.value = t; b.focus(); b.select(); toast('已選取文字，請按 Ctrl+C 複製'); };
+    try {
+      if (!navigator.clipboard || !navigator.clipboard.writeText) { fallback(); return; }
+      navigator.clipboard.writeText(t).then(function () { $('sumBox').hidden = true; toast('已複製摘要'); }, fallback);
+    } catch (e) { fallback(); }
+  }
+
+  /* ---------- 事件 ---------- */
+  document.addEventListener('click', function (ev) {
+    var t = ev.target.closest('[data-tab],[data-d],[data-brush],[data-cdel],#cuAddBtn,#cuCancel,#copyBtn,#resetBtn');
+    if (!t) return;
+    if (t.dataset.tab) {
+      tab = t.dataset.tab; autoSwitched = false; fillInputs(); update();
+      var wr = document.querySelector('.wrap'); wr.classList.remove('swap'); void wr.offsetWidth; wr.classList.add('swap');
+      setTimeout(function () { wr.classList.remove('swap'); }, 600);
+      return;
+    }
+    if (t.dataset.brush) {
+      brush = t.dataset.brush;
+      document.querySelectorAll('[data-brush]').forEach(function (b) { b.setAttribute('aria-checked', String(b.dataset.brush === brush)); });
+      $('brushHint').textContent = brush === 'erase' ? '還原：點已標記的日期，就會還原。' : '已選「' + BR[brush][0] + '」，現在點日曆上的日期。';
+      return;
+    }
+    if (t.dataset.d) {
+      var e2 = S[tab], dk = t.dataset.d, kd = t.dataset.kind, mv0 = t.dataset.mv, full = false, msg = '';
+      var isOff = typeOf(brush) === 'off', isOn = typeOf(brush) === 'on';
+      var flipHol = function () { var ol = e2.off, hv = t.dataset.hid, ix = ol.indexOf(hv); if (ix >= 0) ol.splice(ix, 1); else ol.push(hv); full = true; };
+      if (brush === 'erase') {
+        if (kd === 'mk') { delete e2.mo[dk]; msg = '已還原。'; }
+        else if (kd === 'reh') { flipHol(); msg = '已恢復放假。'; }
+        else msg = '這天沒有標記，不用還原。';
+      } else if (kd === 'mk') {
+        if (mv0 === brush) { delete e2.mo[dk]; msg = '已還原。'; }
+        else if (typeOf(brush) === typeOf(mv0)) { e2.mo[dk] = brush; msg = '改標成' + BR[brush][0] + '。'; }
+        else msg = '這天已標成' + BR[mv0][0] + '，要改請先用「還原」。';
+      } else if (kd === 'sch') {
+        if (isOff) { e2.mo[dk] = brush; msg = '標成' + BR[brush][0] + '，扣 1 天。'; }
+        else msg = '上學日不用補課，補課請點週末。';
+      } else if (kd === 'wk') {
+        if (isOn) { e2.mo[dk] = brush; msg = '標成' + BR[brush][0] + '，加 1 天。'; }
+        else msg = '週末本來就不用上課。';
+      } else if (kd === 'hol') {
+        if (brush === 'on') { flipHol(); msg = '這天改成上課，加回 1 天。'; }
+        else msg = '這天已是國定假日。要改上課，請選「補課／改上課」再點它。';
+      } else if (kd === 'reh') {
+        if (brush === 'on') { flipHol(); msg = '已恢復放假。'; }
+        else msg = '這天原本是國定假日，目前改上課。要恢復放假，請選「還原」再點它。';
+      }
+      update({ keepHol: !full });
+      $('brushHint').textContent = mdw(parseKey(dk)) + ' ' + msg;
+      var back = document.querySelector('[data-d="' + dk + '"]');
+      if (back) back.focus();
+      return;
+    }
+    if (t.id === 'cuAddBtn') {
+      if (S.cu.length >= 4) { toast('自訂項目最多 4 個，請先刪除一個'); return; }
+      $('cuForm').hidden = false; $('cuName').focus(); return;
+    }
+    if (t.id === 'cuCancel') { $('cuForm').hidden = true; return; }
+    if (t.dataset.cdel) {
+      var did = t.dataset.cdel;
+      S.cu = S.cu.filter(function (x) { return x.id !== did; });
+      ['mid', 'fin'].forEach(function (k) { Object.keys(S[k].mo).forEach(function (dk) { if (S[k].mo[dk] === did) delete S[k].mo[dk]; }); });
+      delete BR[did]; delete MCLS[did]; rebuildCu();
+      if (brush === did) brush = 'typ';
+      renderCuBrushes(); update({ keepHol: true });
+      $('brushHint').textContent = '已刪除自訂項目，日曆上它的標記也一起清掉了。';
+      return;
+    }
+    if (t.id === 'copyBtn') { copySummary(); return; }
+    if (t.id === 'resetBtn') {
+      if (!t.dataset.armed) {
+        t.dataset.armed = '1'; t.textContent = '再按一次確定恢復';
+        clearTimeout(resetTimer); resetTimer = setTimeout(function () { delete t.dataset.armed; t.textContent = '恢復預設值'; }, 3500);
+        return;
+      }
+      delete t.dataset.armed; t.textContent = '恢復預設值';
+      S = makeDefaults(TODAY); S.cu = []; rebuildCu(); brush = 'typ'; renderCuBrushes(); syncFin(); syncMath(); fillInputs(); update();
+    }
+  });
+  document.addEventListener('change', function (ev) {
+    var t = ev.target;
+    if (t.matches('[data-hid]')) {
+      var off = S[tab].off, id = t.dataset.hid, i = off.indexOf(id);
+      if (t.checked && i >= 0) off.splice(i, 1);
+      if (!t.checked && i < 0) off.push(id);
+      var li = t.closest('li'); li.classList.toggle('off', !t.checked);
+      li.querySelector('.hb').textContent = t.checked ? '−1 天' : '照常上課';
+      update({ keepHol: true });
+    } else if (t.id === 'inStart' || t.id === 'inEnd') {
+      if (!DATE_RE.test(t.value)) return;
+      S[tab][t.id === 'inStart' ? 'start' : 'end'] = t.value;
+      if (tab === 'mid' && t.id === 'inEnd') syncFin();
+      update();
+    } else if (t.id === 'inMaLinked') {
+      S.fin.maLinked = t.checked; syncMath(); fillInputs(); update();
+    } else if (t.id === 'inLinked') {
+      S.fin.linked = t.checked; syncFin(); fillInputs(); update();
+    }
+  });
+  document.addEventListener('input', function (ev) {
+    var t = ev.target;
+    if (!t.matches || !t.matches('[data-p]')) return;
+    var p = t.dataset.p.split('.'), v = parseInt(t.value, 10);
+    if (!isFinite(v) || v < 0) v = 0;
+    S[tab][p[0]][p[1]] = v;
+    if (tab === 'mid' && p[0] === 'ma' && (p[1] === 'e1' || p[1] === 'e2')) syncMath();
+    update({ keepHol: true });
+  });
+  function renderCuBrushes() {
+    $('cuBrushes').innerHTML = S.cu.map(function (x) {
+      return '<span class="brushwrap"><button type="button" class="brush cb" role="radio" aria-checked="' + (brush === x.id) + '" data-brush="' + x.id + '"><i class="bs m' + x.id + '">' + esc(x.ab) + '</i>' + esc(x.name) + '</button>' +
+        '<button type="button" class="cdel" data-cdel="' + x.id + '" aria-label="刪除自訂項目 ' + esc(x.name) + '">×</button></span>';
+    }).join('');
+    document.querySelectorAll('[data-brush]').forEach(function (b) { b.setAttribute('aria-checked', String(b.dataset.brush === brush)); });
+  }
+  $('cuForm').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var name = ($('cuName').value || '').trim();
+    if (!name) { toast('請先輸入項目名稱'); $('cuName').focus(); return; }
+    var ab = Array.from(($('cuAb').value || '').trim())[0] || Array.from(name)[0];
+    var used = S.cu.map(function (x) { return x.id; }), slot = ['c0', 'c1', 'c2', 'c3'].filter(function (s) { return used.indexOf(s) < 0; })[0];
+    if (!slot) { toast('自訂項目最多 4 個'); return; }
+    S.cu.push({ id: slot, name: name, ab: ab, k: $('cuK').value });
+    rebuildCu(); brush = slot; renderCuBrushes();
+    $('cuName').value = ''; $('cuAb').value = ''; $('cuForm').hidden = true;
+    $('brushHint').textContent = '已新增「' + name + '」，現在點日曆上的日期（' + ($('cuK').value === 'on' ? '週末' : '上學日') + '）。';
+    update({ keepHol: true });
+  });
+  renderCuBrushes();
+
+  fillInputs();
+  update();
+
+  /* 列印／另存 PDF 時，預設檔名用英文，方便上傳 */
+  var TITLE0 = document.title;
+  window.addEventListener('beforeprint', function () {
+    document.title = 'homework-planner_' + (DEF.ay - 1911) + '-' + (DEF.sem === '上' ? '1' : '2') + '_' + (tab === 'mid' ? 'midterm' : 'final');
+  });
+  window.addEventListener('afterprint', function () { document.title = TITLE0; });
+
+  $('brushHint').textContent = '已選「颱風假」，現在點日曆上的日期。';
+
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (en) { $('mini').classList.toggle('show', !en[0].isIntersecting); }, { threshold: 0 })
+      .observe(document.querySelector('.hero'));
+  }
+})();
+</script>
+
+</body>
+</html>
